@@ -201,15 +201,21 @@ function clkInner(){
  const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tehran',hour:'numeric',minute:'numeric',second:'numeric',hour12:false}).formatToParts(new Date());
  const g=k=>+p.find(x=>x.type===k).value,pad=n=>String(n).padStart(2,'0');
  const h=g('hour')%12,m=g('minute'),sec=g('second');
- const hand=(a,len,w,c)=>`<line x1="60" y1="60" x2="${(60+len*Math.sin(a*Math.PI/180)).toFixed(1)}" y2="${(60-len*Math.cos(a*Math.PI/180)).toFixed(1)}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
- const ticks=[...Array(12)].map((_,i)=>{const a=i*30*Math.PI/180;return `<circle cx="${(60+46*Math.sin(a)).toFixed(1)}" cy="${(60-46*Math.cos(a)).toFixed(1)}" r="${i%3?1.2:2.4}" fill="var(--pri)"/>`}).join('');
- const dateStr=new Intl.DateTimeFormat('fa-IR-u-ca-persian',{timeZone:'Asia/Tehran',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
- return `<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap"><svg viewBox="0 0 120 120" width="150" height="150" aria-label="ساعت"><circle cx="60" cy="60" r="56" fill="var(--card)" stroke="var(--pri)" stroke-width="3"/>${ticks}${hand(h*30+m*0.5,28,4,'var(--tx)')}${hand(m*6,40,3,'var(--tx)')}${hand(sec*6,46,1.5,'var(--acc)')}<circle cx="60" cy="60" r="3" fill="var(--acc)"/></svg><div style="flex:1;min-width:200px"><div class="big" style="font-size:30px;color:var(--pri)">${fa(pad(g('hour'))+':'+pad(m))}</div><div style="font-weight:600;margin:2px 0 14px">${esc(dateStr)}</div>${calHTML()}</div></div>`;
+ const hand=(a,len,w,c)=>`<line x1="50" y1="50" x2="${(50+len*Math.sin(a*Math.PI/180)).toFixed(1)}" y2="${(50-len*Math.cos(a*Math.PI/180)).toFixed(1)}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+ const ticks=[...Array(12)].map((_,i)=>{const a=i*30*Math.PI/180;return `<circle cx="${(50+41*Math.sin(a)).toFixed(1)}" cy="${(50-41*Math.cos(a)).toFixed(1)}" r="${i%3?1:2}" fill="var(--pri)"/>`}).join('');
+ const clock=`<svg viewBox="0 0 100 100" width="96" height="96" aria-label="ساعت"><circle cx="50" cy="50" r="48" fill="var(--card)" stroke="var(--pri)" stroke-width="2.5"/>${ticks}${hand(h*30+m*0.5,22,3,'var(--tx)')}${hand(m*6,32,2,'var(--tx)')}${hand(sec*6,38,1,'var(--acc)')}<circle cx="50" cy="50" r="2.5" fill="var(--acc)"/></svg>`;
+ const dateStr=new Intl.DateTimeFormat('fa-IR-u-ca-persian',{timeZone:'Asia/Tehran',weekday:'long',day:'numeric',month:'long'}).format(new Date());
+ const cities=[['تهران',51.4,35.7],['مشهد',59.6,36.3],['اصفهان',51.7,32.7],['شیراز',52.5,29.6],['تبریز',46.3,38.1],['یزد',54.4,31.9],['کیش',54.0,26.5]];
+ const proj=(lo,la)=>[37+(lo-44)*11.73,10+(39.5-la)*13.8];
+ const path='M'+IRP.map(([lo,la])=>proj(lo,la).map(v=>v.toFixed(1)).join(' ')).join(' L')+'Z';
+ const dots=cities.map(([n,lo,la])=>{const [x,y]=proj(lo,la);return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2" fill="var(--acc)" stroke="#fff" stroke-width="1.2"/><text x="${(x+5).toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="13" fill="var(--tx)" style="font-family:Vazirmatn,Tahoma,sans-serif;paint-order:stroke;stroke:var(--card);stroke-width:3">${n}</text>`}).join('');
+ const seaC='M'+[[47.0,44.5],[48.5,42.5],[49.0,40.0],[49.4,38.0],[50.0,37.3],[50.8,36.9],[51.5,36.6],[52.9,36.9],[53.9,36.9],[54.2,37.3],[53.0,39.0],[52.8,41.0],[51.2,43.0],[50.0,44.5],[48.5,45.0]].map(([lo,la])=>proj(lo,la).map(v=>v.toFixed(1)).join(' ')).join(' L')+'Z';
+ const seaG='M'+[[48.0,29.6],[48.5,29.9],[50.1,30.0],[50.8,29.0],[51.5,27.9],[53.0,26.8],[54.5,26.6],[56.2,27.2],[56.9,27.1],[57.3,25.7],[58.0,24.0],[56.0,23.8],[52.0,24.0],[50.0,26.0],[48.0,28.5]].map(([lo,la])=>proj(lo,la).map(v=>v.toFixed(1)).join(' ')).join(' L')+'Z';
+ const map=`<div style="width:170px;flex-shrink:0"><svg viewBox="0 0 300 230" width="170" height="130" aria-label="نقشه ایران"><defs><linearGradient id="irg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7CC0F0"/><stop offset="1" stop-color="#1F5C94"/></linearGradient></defs><g style="transform:perspective(500px) rotateX(32deg);transform-origin:50% 60%"><path d="${seaC}" fill="#3f9bd6" stroke="#2a6fa3" stroke-width=".8"/><path d="${seaG}" fill="#3f9bd6" stroke="#2a6fa3" stroke-width=".8"/><path d="${path}" fill="#0b2a47" transform="translate(0,7)"/><path d="${path}" fill="url(#irg)" stroke="#0b2a47" stroke-width="1.2"/>${dots}</g></svg></div>`;
+ return `<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div style="display:flex;gap:12px;align-items:center"><div>${clock}</div><div><div class="big" style="font-size:20px;color:var(--pri)">${fa(pad(g('hour'))+':'+pad(m))}</div><div style="font-weight:600;font-size:12px;margin-top:2px">${esc(dateStr)}</div><div style="margin-top:8px;font-size:11px;width:150px">${calHTML()}</div></div></div>${map}</div>`;
 }
 function clockW(){
- const pts=IRP.map(([lo,la])=>[37+(lo-44)*11.73,10+(39.5-la)*13.8]);
- const map=`<svg viewBox="0 0 300 230" preserveAspectRatio="xMidYMid meet" style="position:absolute;inset:0;width:100%;height:100%;opacity:.12;pointer-events:none"><path d="M${pts.map(q=>q.map(v=>v.toFixed(1)).join(' ')).join(' L')}Z" fill="var(--pri)"/></svg>`;
- return `<div class="card" style="margin-bottom:14px;position:relative;overflow:hidden"><div style="position:absolute;inset:0;pointer-events:none">${map}</div><div id="clkbox" style="position:relative">${clkInner()}</div></div>`;
+ return `<div class="card" style="margin-bottom:14px;max-width:460px"><div id="clkbox">${clkInner()}</div></div>`;
 }
 setInterval(()=>{const b=document.getElementById('clkbox');if(b)b.innerHTML=clkInner()},1000);
 
