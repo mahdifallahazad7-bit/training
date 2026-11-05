@@ -198,14 +198,10 @@ function calHTML(){
  return `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center">${wd}${dd}</div>`;
 }
 function clkInner(){
- const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tehran',hour:'numeric',minute:'numeric',second:'numeric',hour12:false}).formatToParts(new Date());
+ const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tehran',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date());
  const g=k=>+p.find(x=>x.type===k).value,pad=n=>String(n).padStart(2,'0');
- const h=g('hour')%12,m=g('minute'),sec=g('second');
- const hand=(a,len,w,c)=>`<line x1="50" y1="50" x2="${(50+len*Math.sin(a*Math.PI/180)).toFixed(1)}" y2="${(50-len*Math.cos(a*Math.PI/180)).toFixed(1)}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
- const ticks=[...Array(12)].map((_,i)=>{const a=i*30*Math.PI/180;return `<circle cx="${(50+41*Math.sin(a)).toFixed(1)}" cy="${(50-41*Math.cos(a)).toFixed(1)}" r="${i%3?1:2}" fill="var(--pri)"/>`}).join('');
- const clock=`<svg viewBox="0 0 100 100" width="50" height="50" aria-label="ساعت"><circle cx="50" cy="50" r="48" fill="var(--card)" stroke="var(--pri)" stroke-width="3"/>${ticks}${hand(h*30+m*0.5,22,4,'var(--tx)')}${hand(m*6,32,2.5,'var(--tx)')}${hand(sec*6,38,1.2,'var(--acc)')}<circle cx="50" cy="50" r="3" fill="var(--acc)"/></svg>`;
  const dateStr=new Intl.DateTimeFormat('fa-IR-u-ca-persian',{timeZone:'Asia/Tehran',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
- return `<div style="background:color-mix(in srgb,var(--card) 88%,transparent);border-radius:12px;padding:6px;direction:rtl;box-shadow:0 2px 8px rgba(0,0,0,.2)"><div style="display:flex;gap:6px;align-items:center">${clock}<div><div style="font-weight:800;font-size:14px;color:var(--pri)">${fa(pad(g('hour'))+':'+pad(m))}</div><div style="font-size:9px;font-weight:600">${esc(dateStr)}</div></div></div><div style="margin-top:4px">${calHTML()}</div></div>`;
+ return `<div style="background:color-mix(in srgb,var(--card) 88%,transparent);border-radius:12px;padding:8px 10px;direction:rtl;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.2)"><div style="font-weight:800;font-size:18px;color:var(--pri)">${fa(pad(g('hour'))+':'+pad(g('minute')))}</div><div style="font-size:10px;font-weight:600;margin-top:2px">${esc(dateStr)}</div></div>`;
 }
 function clockW(){
  return `<div style="position:relative;width:200px;margin-bottom:14px"><img src="${IRIMG}" alt="نقشه ایران" style="display:block;width:200px;border-radius:14px"><div id="clkbox" style="position:absolute;top:8px;right:8px;width:150px">${clkInner()}</div></div>`;
