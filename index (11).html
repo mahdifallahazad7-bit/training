@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>واحد آموزش</title><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#F3F5F9;--card:#fff;--tx:#12263F;--mu:#5B6F86;--bd:#E3E8F0;--side:#12365A;--pri:#12365A;--acc:#E08A2B;--okb:#E4F2E7;--okt:#1E6B35;--nob:#FBE3E1;--not:#9B2C22;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1621;--card:#172231;--tx:#E6EDF5;--mu:#8DA0B8;--bd:#26354A;--side:#0A2038;--pri:#3F78AE;--okb:#173B25;--okt:#8FD9A5;--nob:#4A1F1B;--not:#F2A59D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1621;--card:#172231;--tx:#E6EDF5;--mu:#8DA0B8;--bd:#26354A;--side:#0A2038;--pri:#3F78AE;--okb:#173B25;--okt:#8FD9A5;--nob:#4A1F1B;--not:#F2A59D;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:'Vazirmatn',Tahoma,sans-serif}
+.app{display:flex;min-height:100vh}.side{width:220px;background:var(--side);color:#fff;padding:28px 16px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.side b{font-size:20px}.side small{color:#A9BDD3;margin-bottom:18px}
+.nav{padding:11px 14px;border-radius:10px;color:#D6E2EF;text-decoration:none;font-size:14px}.nav.on{background:var(--acc);color:#fff;font-weight:600}
+.main{flex:1;padding:28px 32px;min-width:0}.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px}
+.row{display:flex;gap:14px;flex-wrap:wrap}.row>.card{flex:1;min-width:150px}.mu{color:var(--mu);font-size:13px}.big{font-size:30px;font-weight:800}
+h1{margin:0 0 4px;font-size:24px}.bar{height:12px;background:var(--bd);border-radius:6px;margin:6px 0 14px}.bar i{display:block;height:12px;background:var(--pri);border-radius:6px}
+button,select{font:600 14px 'Vazirmatn',Tahoma,sans-serif;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);min-height:44px;padding:0 16px}
+.pri{background:var(--pri);color:#fff;border:0}.acc{background:var(--acc);color:#fff;border:0}
+input,textarea{font:14px 'Vazirmatn',Tahoma,sans-serif;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);padding:10px 12px;width:100%;box-sizing:border-box;margin:0 0 10px}textarea{min-height:70px;resize:vertical}.p{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--bd)}
+.ok{background:var(--okb);color:var(--okt)}.no{background:var(--nob);color:var(--not)}.chip{min-width:84px}
+.sc{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0 18px}.sc button{padding:0}.sc .s{background:var(--pri);color:#fff;border:0}
+@media (max-width:760px){.app{flex-direction:column}.side{width:auto;flex-direction:row;overflow-x:auto;padding:12px;gap:4px;align-items:center}.side small{display:none}.side b{margin-left:10px;white-space:nowrap}.nav{white-space:nowrap}.main{padding:18px 16px}}
+.tp{position:fixed;inset-inline-start:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:16px;width:250px;box-shadow:0 8px 28px rgba(0,0,0,.25)}.tp[hidden]{display:none}.sw{width:38px;height:38px;min-height:38px;border-radius:50%;border:3px solid var(--card);padding:0}.sw.on{outline:3px solid var(--tx)}.md button.on,.ly button.on{background:var(--pri);color:#fff;border:0}.tp{max-height:80vh;overflow:auto}.nav{display:flex;align-items:center;gap:10px}.ic{display:none;width:20px;height:20px;flex-shrink:0}
+[data-layout="office"] .app{flex-direction:column}
+[data-layout="office"] .side{width:auto;flex-direction:row;align-items:center;gap:4px;background:var(--card);color:var(--tx);border-bottom:1px solid var(--bd);padding:0 24px;overflow-x:auto}
+[data-layout="office"] .side b{color:var(--pri);margin-inline-end:20px;white-space:nowrap}
+[data-layout="office"] .side small{display:none}
+[data-layout="office"] .nav{color:var(--mu);border-radius:0;padding:20px 12px;white-space:nowrap}
+[data-layout="office"] .nav.on{background:none;color:var(--pri);font-weight:800;box-shadow:inset 0 -3px 0 var(--pri)}
+[data-layout="office"] .main{max-width:1000px;width:100%;margin:0 auto;box-sizing:border-box}
+[data-layout="modern"] .card{border-radius:18px}
+@media (min-width:761px){[data-layout="modern"] .side{width:84px;padding:22px 10px;align-items:center}[data-layout="modern"] .side b,[data-layout="modern"] .side small{display:none}[data-layout="modern"] .nav{width:56px;height:56px;padding:0;justify-content:center;gap:0;border-radius:14px}[data-layout="modern"] .nav .t{display:none}[data-layout="modern"] .nav .ic{display:block}}
+[data-layout="cards"] .side{background:var(--card);color:var(--tx);border-inline-end:1px solid var(--bd)}
+[data-layout="cards"] .side b{color:var(--pri)}
+[data-layout="cards"] .side small,[data-layout="cards"] .nav{color:var(--mu)}
+[data-layout="cards"] .nav.on{background:color-mix(in srgb,var(--pri) 13%,transparent);color:var(--pri);font-weight:800}
+[data-layout="cards"] .nav .ic{display:block}
+[data-layout="cards"] .card{border-radius:18px;border:0;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+[data-layout="cards"] .big{color:var(--pri)}
+[data-layout="cards"] .row>.card:nth-child(4n+1){background:color-mix(in srgb,var(--pri) 10%,var(--card))}
+[data-layout="cards"] .row>.card:nth-child(4n+2){background:color-mix(in srgb,var(--acc) 12%,var(--card))}
+</style></head><body>
+<div class="app"><nav class="side"><b>واحد آموزش</b><small>ایستان‌آوران نیرو</small><a class="nav" href="#dash" data-v="dash" title="داشبورد"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span class="t">داشبورد</span></a><a class="nav" href="#courses" data-v="courses" title="دوره‌های آموزشی"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19a2 2 0 012-2h13"/></svg><span class="t">دوره‌های آموزشی</span></a><a class="nav" href="#catalog" data-v="catalog" title="دوره‌های مورد نیاز"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="t">دوره‌های مورد نیاز</span></a><a class="nav" href="#att" data-v="att" title="حضور و غیاب"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg><span class="t">حضور و غیاب</span></a><a class="nav" href="#survey" data-v="survey" title="نظرسنجی‌ها"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg><span class="t">نظرسنجی‌ها</span></a><a class="nav" href="#people" data-v="people" title="شناسنامه آموزشی"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21a8 8 0 0116 0"/></svg><span class="t">شناسنامه آموزشی</span></a><a class="nav" href="#lib" data-v="lib" title="کتابخانه"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h6a3 3 0 013 3v12a2 2 0 00-2-2H3zM21 5h-6a3 3 0 00-3 3v12a2 2 0 012-2h7z"/></svg><span class="t">کتابخانه</span></a><a class="nav" href="#gallery" data-v="gallery" title="گالری عکس"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 6"/></svg><span class="t">گالری عکس</span></a><a class="nav" href="#res" data-v="res" title="جزوه و فیلم"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM9 12h7M9 16h7"/></svg><span class="t">جزوه و فیلم</span></a><button class="nav" data-a="tp" style="margin-top:auto;border:0;background:transparent;text-align:start;min-height:0;font-weight:400" title="رنگ و ظاهر"><span>🎨</span><span class="t"> رنگ و ظاهر</span></button></nav><main class="main" id="m"></main></div><div class="tp" id="tp" hidden><b style="font-size:14px">رنگ برنامه</b><div id="sw" style="display:flex;gap:10px;margin:12px 0 16px"></div><b style="font-size:14px">چیدمان</b><div class="ly" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 16px"><button data-a="lay" data-v="classic" style="padding:0">کلاسیک</button><button data-a="lay" data-v="office" style="padding:0">اداری</button><button data-a="lay" data-v="modern" style="padding:0">مدرن</button><button data-a="lay" data-v="cards" style="padding:0">کارتی</button></div><b style="font-size:14px">حالت نمایش</b><div class="md" style="display:flex;gap:6px;margin-top:10px"><button data-a="mode" data-v="light" style="flex:1;padding:0">روشن</button><button data-a="mode" data-v="dark" style="flex:1;padding:0">تیره</button><button data-a="mode" data-v="auto" style="flex:1;padding:0">خودکار</button></div><div class="mu" style="margin-top:10px">فقط روی همین دستگاه ذخیره می‌شود.</div></div>
+<script>
+/* ===== تنظیمات گیت‌هاب: نام کاربری و نام repo ===== 
+   اگر null بماند یا فایل مستقیم از گوشی باز شود، «حالت محلی» (فقط همان دستگاه) فعال است. */
+window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'};
+(function(){
+  const C=window.GH_CONFIG, GH=!!C&&/^https?:/.test(location.protocol);
+  const rid=()=>Array.from(crypto.getRandomValues(new Uint8Array(10))).map(b=>b.toString(16).padStart(2,'0')).join('');
+  const enc=s=>btoa(unescape(encodeURIComponent(s))), cache={}, pend={}, subs=[];
+  let S={}, admin=!GH, token=(()=>{try{return localStorage.getItem('ea_gh_token')||''}catch(e){return''}})(), tm=0, ver=0, saved=0, saving=false, st=0, btn=null;
+  const refresh=()=>{clearTimeout(tm);tm=setTimeout(()=>{try{window.render&&window.render(true)}catch(e){}},150)};
+  const snap=p=>({docs:Object.entries(S[p]||{}).map(([id,v])=>({id,data:()=>v}))});
+  const fire=p=>subs.filter(x=>x.p===p).forEach(x=>x.f(snap(p)));
+  const fireAll=()=>[...new Set(subs.map(x=>x.p))].forEach(fire);
+  const API=p=>'https://api.github.com/repos/'+C.owner+'/'+C.repo+'/contents/'+p;
+  const hd=(a)=>({Accept:a||'application/vnd.github+json',Authorization:'Bearer '+token,'Content-Type':'application/json'});
+  async function getText(path){
+    const r=token?await fetch(API(path)+'?ref='+C.branch+'&t='+Date.now(),{headers:hd('application/vnd.github.raw+json')}):await fetch(path+'?t='+Date.now());
+    if(r.status===404)return null; if(!r.ok)throw 0; return r.text();
+  }
+  async function put(path,text){
+    const m=await fetch(API(path)+'?ref='+C.branch,{headers:hd()}); const body={message:'update',content:enc(text),branch:C.branch};
+    if(m.ok)body.sha=(await m.json()).sha; const r=await fetch(API(path),{method:'PUT',headers:hd(),body:JSON.stringify(body)}); if(!r.ok)throw 0;
+  }
+  async function del(path){const m=await fetch(API(path)+'?ref='+C.branch,{headers:hd()});if(!m.ok)return;await fetch(API(path),{method:'DELETE',headers:hd(),body:JSON.stringify({message:'delete',sha:(await m.json()).sha,branch:C.branch})})}
+  function persist(){
+    if(!GH){try{localStorage.setItem('ea_local_db',JSON.stringify(S))}catch(e){alert('حافظه دستگاه پر است.')}return}
+    ver++;clearTimeout(st);st=setTimeout(flush,700);
+  }
+  async function flush(){
+    if(saving){st=setTimeout(flush,700);return} saving=true; const v=ver;
+    try{await put('data.json',JSON.stringify(S));saved=v}catch(e){alert('ذخیره در گیت‌هاب انجام نشد. اینترنت یا توکن را بررسی کنید.')}
+    saving=false; if(saved<ver&&saved===v)flush();
+  }
+  async function load(){
+    if(ver>saved)return;
+    try{const t=await getText('data.json');const n=JSON.parse(t||'{}');if(JSON.stringify(n)!==JSON.stringify(S)){S=n;fireAll()}}catch(e){}
+  }
+  const need=()=>{if(GH&&!admin)throw new Error('no-permission')};
+  const part=p=>{const i=p.lastIndexOf('/');return[p.slice(0,i),p.slice(i+1)]};
+  const db={
+    collection:p=>({onSnapshot(f){subs.push({p,f});setTimeout(()=>f(snap(p)),0)},async add(v){need();(S[p]=S[p]||{})[rid()]=JSON.parse(JSON.stringify(v));fire(p);persist()}}),
+    doc:p=>{const[c,id]=part(p);return{async set(v){need();(S[c]=S[c]||{})[id]=JSON.parse(JSON.stringify(v));fire(c);persist()},async delete(){need();if(S[c])delete S[c][id];fire(c);persist()}}}
+  };
+  window.blobUrl=id=>{
+    if(!id)return''; if(cache[id])return cache[id];
+    if(!GH){const b=(S._blobs||{})[id];return b?b.data:''}
+    if(!pend[id]){pend[id]=1;getText('blobs/'+id+'.json').then(t=>{if(t){cache[id]=JSON.parse(t).data;refresh()}else pend[id]=0}).catch(()=>{pend[id]=0})}
+    return'';
+  };
+  const MAX=4*1024*1024, IMG=900*1024;
+  const rd=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)});
+  async function shrink(f){
+    const url=await rd(f), img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=url});
+    let sc=Math.min(1,1600/Math.max(img.width,img.height)),q=.8;
+    for(let k=0;k<6;k++){const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const o=c.toDataURL('image/jpeg',q);if(o.length<IMG)return o;sc*=.8;q=Math.max(.5,q-.08)}
+    throw{code:'too_large'};
+  }
+  const assets={
+    async upload(f){
+      need(); const isImg=/^image\/(jpeg|png|webp)/.test(f.type); let data;
+      if(isImg)data=await shrink(f); else{data=await rd(f);if(data.length>MAX)throw{code:'too_large'}}
+      const id=rid(), type=isImg?'image/jpeg':f.type, rec={data,type,at:Date.now()};
+      if(GH)await put('blobs/'+id+'.json',JSON.stringify(rec)); else{(S._blobs=S._blobs||{})[id]=rec;persist()}
+      cache[id]=data; refresh(); return{id,url:data,sizeBytes:data.length,contentType:type};
+    },
+    async delete(id){need();delete cache[id];if(GH)await del('blobs/'+id+'.json');else{if(S._blobs)delete S._blobs[id];persist()}}
+  };
+  const downloads={async save({filename,data}){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data]));a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}};
+
+  window.__authReady=(async()=>{
+    if(!GH){try{S=JSON.parse(localStorage.getItem('ea_local_db')||'{}')}catch(e){}return}
+    if(token){try{const r=await fetch('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:hd()});admin=r.ok&&!!(await r.json()).permissions?.push}catch(e){admin=false}if(!admin)token=''}
+    btn=document.createElement('button');
+    btn.style.cssText='position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:50;padding:6px 12px;border-radius:8px;border:1px solid #8884;background:#fff;color:#12263F;font:12px Vazirmatn,Tahoma;opacity:.85';
+    btn.textContent=admin?'قفل کردن (خروج مدیر)':'ورود مدیر';
+    const b64=a=>btoa(String.fromCharCode(...new Uint8Array(a))), ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+    const dk=async(pw,salt)=>{const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])};
+    const lockTok=async(t,pw)=>{const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await dk(pw,salt),new TextEncoder().encode(t));return JSON.stringify([b64(salt),b64(iv),b64(ct)])};
+    const openTok=async(s,pw)=>{const[x,y,z]=JSON.parse(s).map(ub);return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:y},await dk(pw,x),z))};
+    const canPush=async t=>{const r=await fetch('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:{Authorization:'Bearer '+t}});return r.ok&&!!(await r.json()).permissions?.push};
+    btn.onclick=async()=>{
+      if(admin){try{localStorage.removeItem('ea_gh_token')}catch(e){}location.reload();return}
+      try{
+        let enc=localStorage.getItem('ea_gh_enc'), t='';
+        if(enc){
+          const pw=prompt('رمز مدیر را وارد کنید:\n(اگر فراموش کردید، کلمه «توکن» را بنویسید)'); if(!pw)return;
+          if(pw.trim()!=='توکن'){try{t=await openTok(enc,pw)}catch(e){alert('رمز اشتباه است.');return}}
+          else{localStorage.removeItem('ea_gh_enc');enc=null}
+        }
+        if(!t){t=(prompt('توکن گیت‌هاب را وارد کنید:')||'').trim();if(!t)return}
+        if(!(await canPush(t))){alert('این توکن اجازه نوشتن در این repo را ندارد.');return}
+        if(!enc){const pw=prompt('یک رمز کوتاه برای ورودهای بعدی انتخاب کنید (دفعه بعد فقط همین را می‌زنید):');if(pw)localStorage.setItem('ea_gh_enc',await lockTok(t,pw))}
+        localStorage.setItem('ea_gh_token',t);location.reload();
+      }catch(e){alert('اتصال به گیت‌هاب برقرار نشد.')}
+    };
+    document.addEventListener('DOMContentLoaded',()=>document.body.appendChild(btn));
+    if(document.body)document.body.appendChild(btn);
+    load(); setInterval(load,60000); document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
+  })();
+  window.EV=null; if(GH)window.__authReady.then(()=>{if(!admin)return;return fetch('evals.json?t='+Date.now()).then(r=>r.ok?r.json():null).then(j=>{window.EV=j;refresh()})}).catch(()=>{});
+  window.claude={async use(n){
+    await window.__authReady;
+    if(n==='db')return db; if(n==='assets')return assets; if(n==='downloads')return downloads;
+    if(n==='user')return{canEdit:async()=>admin,isOwner:()=>admin};
+    return null;
+  }};
+})();
+</script>
+<script>
+const Q=['تسلط و قدرت بیان استاد','جلب مشارکت و همکاری فراگیران','نظم و ترتیب و ارائه گام‌به‌گام مطلب','به‌روز بودن دانش و اطلاعات استاد','قدرت و توانایی پاسخ‌گویی به پرسش‌ها','کاربردی بودن مطالب و جمع‌بندی','تأثیر دوره بر دانش، نگرش و مهارت شما','تناسب حجم مطالب با موضوع دوره','تناسب مطالب با نیازهای فعلی شما','کیفیت محل، فضا و امکانات آموزشی','نحوه مدیریت و هماهنگی برگزارکنندگان','زمان برگزاری (روز و ساعت دوره)','ارزیابی کلی شما از دوره'];
+const D0=['۱۴۰۵/۰۷/۱۶','۱۴۰۵/۰۷/۲۳'];
+const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]).replace('.','٫');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let gc='',rc='',photos=[],pv='',cat=[],cu='',db=null,admin=false,courses={},people=[],lib=[],att={},sv=[],cid='',sg='',ss='1',sgrp='',marks=null,ans=Array(13).fill(0),done=false,msg='',pend='';
+const V=['dash','courses','catalog','att','survey','people','gallery','res','lib'],view=()=>V.includes(location.hash.slice(1))?location.hash.slice(1):'dash';
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0,cl=()=>Object.keys(courses),C=()=>courses[cid]||null;
+const sgs=c=>c.sgroups||Object.fromEntries(Object.entries(c.groups||{}).map(([k,g])=>[k,g.name])),sess=c=>c.sessions&&c.sessions.length?c.sessions:D0;
+function ensure(){if(!courses[cid])cid=courses.plc?'plc':(cl()[0]||'');const c=C();if(c){const g=Object.keys(c.groups||{});if(!g.includes(sg))sg=g[0]||'';const k=cat.map(x=>x.id);if(!k.includes(sgrp))sgrp=k[0]||''}}
+const chip=(t,c)=>`<span style="${c};border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;white-space:nowrap">${t}</span>`;
+const okc='background:var(--okb);color:var(--okt)',plc='background:#FDEBD3;color:#8A4B08';
+const delb=(k,id)=>admin?`<button data-a="del" data-k="${k}" data-id="${esc(id)}" style="min-height:36px;padding:0 12px;color:var(--not)">${pend===k+id?'تأیید حذف':'حذف'}</button>`:'';
+const head=(t,s)=>`<h1>${t}</h1><div class="mu" style="margin-bottom:16px">${s||''}</div>`;
+const csel=()=>cl().length>1?`<select data-a="c" style="margin-bottom:12px">${cl().map(k=>`<option value="${esc(k)}"${k===cid?' selected':''}>${esc(courses[k].title)}</option>`).join('')}</select>`:'';
+const held=id=>Object.values(att).some(a=>a.course===id);
+const nk=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/^INTR/,'').replace(/([A-Z]+)0*(\d+)/,'$1$2');
+const doneN=code=>Object.values(courses).filter(c=>[c.code,...(c.codes||[])].some(x=>x&&nk(x)===nk(code))).length;
+function catV(){const u=cat.find(x=>x.id===cu)||cat[0];if(!u)return head('دوره‌های مورد نیاز')+'<div class="mu">لیستی ثبت نشده است.</div>';
+const items=u.items||[],dn=items.filter(i=>doneN(i.c)).length;
+const f=admin?`<div class="card" style="margin-top:14px"><b>افزودن دوره به این لیست</b><div style="height:12px"></div><input id="c_t" placeholder="عنوان دوره"><button class="acc" data-a="cadd" style="width:100%">افزودن</button></div>`:'';
+return head('دوره‌های مورد نیاز','لیست دوره‌های آموزشی و مهارت‌های مورد نیاز هر واحد')+`<select data-a="cu" style="margin-bottom:14px;max-width:100%">${cat.map(x=>`<option value="${esc(x.id)}"${x.id===u.id?' selected':''}>${esc(x.name)}</option>`).join('')}</select><div class="row" style="margin-bottom:14px"><button data-a="xcu">خروجی اکسل این واحد</button><button data-a="xca">خروجی اکسل همه واحدها</button></div><div class="card"><div class="mu" style="margin-bottom:6px">${fa(dn)} از ${fa(items.length)} دوره برگزار شده · فرم ${esc(u.form||'')}</div>${items.map(i=>`<div class="p"><div><div style="font-weight:600;font-size:14px">${esc(i.t)}</div><div class="mu" style="direction:ltr;text-align:right">${esc(i.c)}</div></div><div style="display:flex;gap:6px;align-items:center">${doneN(i.c)?chip('برگزار شد',okc):chip('در انتظار',plc)}${delb('cdel',u.id+'|'+i.c)}</div></div>`).join('')||'<div class="mu">دوره‌ای ثبت نشده است.</div>'}</div>${f}<div class="mu" style="margin-top:8px">${esc(msg)}</div>`}
+function evalCard(){
+ if(!admin||!window.EV||!EV.people||!EV.people.length)return'';
+ const T=EV.titles||{},pct=(a,b)=>b?Math.round(a*100/b):0;
+ const P=EV.people.map(p=>{const e=Object.entries(p.marks).filter(([c,x])=>x!==null);return{...p,k:e.filter(([,x])=>x===1).length,tot:e.length,need:e.filter(([,x])=>x===0).map(([c])=>c)}});
+ const done=P.filter(p=>p.tot),sk=done.reduce((a,p)=>a+p.k,0),st=done.reduce((a,p)=>a+p.tot,0),cnt={};
+ done.forEach(p=>p.need.forEach(c=>cnt[c]=(cnt[c]||0)+1));
+ const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,8),byU={},bar=v=>`<div class="bar"><i style="width:${v}%"></i></div>`;
+ P.forEach(p=>(byU[p.unit]=byU[p.unit]||[]).push(p));
+ const unitH=Object.entries(byU).map(([u,L])=>{const d=L.filter(p=>p.tot),uk=d.reduce((a,p)=>a+p.k,0),ut=d.reduce((a,p)=>a+p.tot,0);
+  return `<details class="p" style="display:block;margin-top:8px"><summary style="cursor:pointer"><b>${esc(u)}</b> <span class="mu">· ${fa(L.length)} نفر · مسلط ${fa(pct(uk,ut))}٪</span>${bar(pct(uk,ut))}</summary>${L.map(p=>`<details style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)"><summary style="cursor:pointer;display:flex;justify-content:space-between;gap:8px"><span>${esc(p.name)}</span><span class="mu">${p.tot?fa(p.k)+' از '+fa(p.tot)+' مسلط':'ارزیابی تکمیل نشده'}</span></summary>${p.need.length?`<div class="mu" style="margin:6px 0">نیاز به آموزش (${fa(p.need.length)} مورد):</div>`+p.need.map(c=>`<div style="font-size:13px;padding:2px 0">${esc(c)} — ${esc(T[c]||'')}${p.notes&&p.notes[c]?` <span class="mu">(${esc(p.notes[c])})</span>`:''}</div>`).join(''):''}</details>`).join('')}</details>`}).join('');
+ return `<div class="card" style="margin-top:14px"><b>ارزیابی اولیه نیروها</b><div class="mu" style="margin:4px 0 12px">${fa(done.length)} نفر ارزیابی شده · میانگین تسلط ${fa(pct(sk,st))}٪ · ${fa(st-sk)} مورد نیاز به آموزش</div>${top.length?`<div style="font-size:13px;font-weight:600;margin-bottom:6px">بیشترین نیاز آموزشی</div>${top.map(([c,n])=>`<div style="font-size:13px;padding:2px 0">${esc(T[c]||c)} <span class="mu">· ${fa(n)} نفر</span></div>`).join('')}<div style="height:10px"></div>`:''}${unitH}</div>`}
+function dash(){const all=sv.flatMap(s=>s.scores||[]),m=Object.values(att).flatMap(a=>a.marks||[]),pr=m.filter(x=>x).length,agg={};
+sv.forEach(s=>{const c=courses[s.course],lb=(cat.find(x=>x.id===s.group)||{}).name||(c?(sgs(c)[s.group]||s.group):s.group);(agg[lb]=agg[lb]||[]).push(...(s.scores||[]))});
+const gs=Object.entries(agg).map(([k,a])=>[k,avg(a)]).sort((x,y)=>y[1]-x[1]);
+const kp=[['دوره‌های ثبت‌شده',fa(cl().length),''],['حاضرین از کل (همه جلسات)',m.length?fa(pr)+' از '+fa(m.length):'—',''],['میانگین رضایت',all.length?fa(avg(all).toFixed(1)):'—','color:#B35F0E'],['فرم‌های ثبت‌شده',fa(sv.length),'']];
+const rc=cl().map(k=>[k,courses[k]]).sort((x,y)=>(y[1].createdAt||0)-(x[1].createdAt||0)).slice(0,5);
+return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px"><div><h1>${admin?'سلام مهدی جان':'سلام'}</h1><div class="mu">خلاصه فعالیت‌های آموزشی</div></div>${admin?'<a href="#courses"><button class="pri">ثبت دوره جدید</button></a>':''}</div><div class="row">${kp.map(k=>`<div class="card"><div class="mu">${k[0]}</div><div class="big" style="${k[2]}">${k[1]}</div></div>`).join('')}</div><div class="row" style="margin-top:14px;align-items:stretch"><div class="card" style="flex:1.6;min-width:280px"><b>آخرین دوره‌ها</b>${rc.length?rc.map(([k,c])=>`<div class="p" style="margin-top:6px"><div><div style="font-weight:600">${esc(c.title)}</div><div class="mu">${esc(c.instructor)} · ${esc(sess(c)[0])} · ${fa(Object.keys(c.groups||{}).length)} گروه</div></div>${held(k)?chip('برگزار شد',okc):chip('برنامه‌ریزی',plc)}</div>`).join(''):'<div class="mu" style="margin-top:10px">هنوز دوره‌ای ثبت نشده است.</div>'}</div><div class="card" style="flex:1;min-width:240px"><b>رضایت به تفکیک گروه</b><div style="height:12px"></div>${gs.length?gs.map(g=>`<div style="font-size:12px">${esc(g[0])} ${fa(g[1].toFixed(2))}</div><div class="bar"><i style="width:${g[1]*10}%"></i></div>`).join(''):'<div class="mu">نظرسنجی‌ای ثبت نشده است.</div>'}</div></div>${evalCard()}`}
+function coursesV(){const f=admin?`<div class="card" style="margin-top:14px"><b>ثبت دوره جدید</b><div style="height:12px"></div><input id="f_t" placeholder="نام دوره"><input id="f_c" list="cl" placeholder="کد دوره (اختیاری؛ از لیست مورد نیاز انتخاب کنید)"><datalist id="cl">${cat.flatMap(u=>u.items.map(i=>`<option value="${esc(i.c)}">${esc(i.t)}</option>`)).join('')}</datalist><input id="f_i" placeholder="نام مدرس"><textarea id="f_d" placeholder="تاریخ جلسات (هر تاریخ در یک خط، مثلاً ۱۴۰۵/۰۸/۰۱)"></textarea>${[1,2,3].map(i=>`<input id="g${i}n" placeholder="نام گروه ${fa(i)}${i>1?' (اختیاری)':''}"><select data-a="fg" data-g="${i}" style="width:100%;margin-bottom:10px"><option value="">افزودن افراد از یک واحد…</option>${cat.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select><textarea id="g${i}m" placeholder="اسامی افراد گروه ${fa(i)} (هر نام در یک خط)"></textarea>`).join('')}<button class="acc" data-a="addc" style="width:100%">ثبت دوره</button></div>`:'';
+return head('دوره‌های آموزشی','فهرست دوره‌ها و ثبت دوره جدید')+(cl().length?cl().map(k=>{const c=courses[k];return `<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(c.title)}${(c.codes||[c.code]).filter(Boolean).length?' · '+(c.codes||[c.code]).filter(Boolean).map(esc).join('، '):''}</b>${delb('courses',k)}</div><div class="mu" style="margin:6px 0">مدرس: ${esc(c.instructor)} · جلسات: ${sess(c).map(esc).join('، ')}</div>${Object.values(c.groups||{}).map(g=>`<div style="font-size:13px">${esc(g.name)}: ${fa((g.members||[]).length)} نفر</div>`).join('')}</div>`}).join(''):'<div class="card mu">دوره‌ای ثبت نشده است.</div>')+f+`<div class="mu" style="margin-top:8px">${esc(msg)}</div>`}
+function attv(){ensure();const c=C();if(!c)return head('حضور و غیاب')+'<div class="mu">ابتدا یک دوره ثبت کنید.</div>';const g=c.groups[sg],id=cid+'_'+sg+'_'+ss;
+if(!marks||marks.id!==id)marks={id,v:(att[id]?att[id].marks:g.members.map(()=>1)).slice()};const pr=marks.v.filter(x=>x).length;
+return head('حضور و غیاب',esc(c.title))+csel()+`<button data-a="xat" style="margin-bottom:12px">خروجی اکسل این دوره</button>`+`<div class="row" style="margin-bottom:14px"><select data-a="g">${Object.keys(c.groups).map(k=>`<option value="${k}"${k===sg?' selected':''}>${esc(c.groups[k].name)}</option>`).join('')}</select><select data-a="s">${sess(c).map((d,i)=>`<option value="${i+1}"${String(i+1)===ss?' selected':''}>جلسه ${fa(i+1)} · ${esc(d)}</option>`).join('')}</select></div><div class="card"><div class="mu">حاضر ${fa(pr)} · غایب ${fa(marks.v.length-pr)} · کل ${fa(marks.v.length)}</div>${g.members.map((n,i)=>`<div class="p"><span>${fa(i+1)}. ${esc(n)}</span><div style="display:flex;gap:6px"><button class="chip ${marks.v[i]?'ok':'no'}" data-a="t" data-i="${i}" ${admin?'':'disabled'}>${marks.v[i]?'حاضر':'غایب'}</button>${admin?`<button data-a="mdel" data-i="${i}" style="min-height:44px;padding:0 12px;color:var(--not)">${pend==='mdel'+cid+sg+i?'تأیید حذف':'حذف'}</button>`:''}</div></div>`).join('')}</div>${admin?'<button class="pri" style="margin-top:14px;width:100%" data-a="save">ذخیره حضور و غیاب</button>':'<div class="mu" style="margin-top:12px">فقط مدیر می‌تواند حضور و غیاب را ثبت کند.</div>'}<div class="mu" style="margin-top:8px">${esc(msg)}</div>`}
+function sur(){ensure();const c=C();if(!c)return head('نظرسنجی')+'<div class="mu">دوره‌ای برای نظرسنجی ثبت نشده است.</div>';
+if(done)return `<h1>ممنون از شما</h1><div class="card" style="margin:14px 0">نظر شما به‌صورت ناشناس ثبت شد.</div><button data-a="again">ثبت نظر دیگر</button>`;const n=ans.filter(Boolean).length,gg=Object.fromEntries(cat.map(x=>[x.id,x.name]));
+return head('نظرسنجی دوره '+esc(c.title),'فرم ناشناس · واحد خود را انتخاب کنید و به هر مورد از ۱ (کاملاً ناراضی) تا ۱۰ (کاملاً راضی) نمره بدهید')+csel()+(admin?`<button data-a="xsv" style="margin-bottom:12px">خروجی اکسل نتایج نظرسنجی</button>`:'')+`<select data-a="sg" style="margin-bottom:14px">${Object.keys(gg).map(k=>`<option value="${k}"${k===sgrp?' selected':''}>${esc(gg[k])}</option>`).join('')}</select>${Q.map((q,i)=>`<div class="card" style="margin-bottom:12px"><b style="font-size:14px">${fa(i+1)}. ${q}</b><div class="sc">${[1,2,3,4,5,6,7,8,9,10].map(v=>`<button class="${ans[i]===v?'s':''}" data-a="a" data-i="${i}" data-v="${v}">${fa(v)}</button>`).join('')}</div></div>`).join('')}<button class="acc" style="width:100%;min-height:48px" data-a="send" ${n<13||!db?'disabled':''}>ارسال نظر (${fa(n)} از ۱۳)</button><div class="mu" style="margin-top:8px">${esc(msg)}</div>`}
+const nn=s=>String(s||'').replace(/[\u200c\s]/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک');
+function lev(a,b){const m=[...Array(a.length+1)].map((_,i)=>[i]);for(let j=1;j<=b.length;j++)m[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]}
+const same=(a,b)=>{a=nn(a);b=nn(b);return a===b||(Math.min(a.length,b.length)>=8&&(a.includes(b)||b.includes(a)||lev(a,b)<=1))};
+function roster(){const r=people.map(p=>({n:p.name,u:p.unit||'',id:p.id,edu:p.edu||'',pr:0,ab:0,cs:new Set(),rec:p.items||[]})),get=n=>{let o=r.find(x=>same(x.n,n));if(!o){o={n,u:'',id:'',edu:'',pr:0,ab:0,cs:new Set(),rec:[]};r.push(o)}return o};
+Object.values(courses).forEach(c=>Object.values(c.groups||{}).forEach(g=>(g.members||[]).forEach(n=>get(n).cs.add(c.title))));
+Object.values(att).forEach(a=>{const c=courses[a.course],g=c&&c.groups&&c.groups[a.group];if(!g)return;g.members.forEach((n,i)=>{const o=get(n);a.marks[i]?o.pr++:o.ab++})});
+return r.sort((x,y)=>x.n.localeCompare(y.n,'fa'))}
+const opn=new Set();
+const H=['واحد','نام و نام خانوادگی','مدرک تحصیلی','عنوان دوره','مدت','نمره','سال','نوع','مجری دوره'];
+const prow=(o,i)=>[(cat.find(x=>x.id===o.u)||{}).name||'',o.n,o.edu,i?i.t:'',i?i.d:'',i?i.s:'',i?i.y:'',i?i.k:'',i?i.e:''],rows=L=>L.flatMap(o=>o.rec.length?o.rec.map(i=>prow(o,i)):[prow(o)]);
+function mkb(sheets){const wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};sheets.forEach(([n,r])=>{const ws=XLSX.utils.aoa_to_sheet([H,...r]);ws['!cols']=[18,24,26,40,10,10,8,12,28].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws,n.slice(0,31).replace(/[:*?\/\\\[\]]/g,' '))});return wb}
+async function xout(wb,name){try{if(typeof XLSX==='undefined'){msg='کتابخانه ساخت اکسل بارگذاری نشده است.';return}const d=await claude.use('downloads');if(!d){msg='ذخیره فایل در این نمایش ممکن نیست.';return}await d.save({filename:name.replace(/[:*?\"<>|\/\\]/g,' ')+'.xlsx',data:XLSX.write(wb,{type:'array',bookType:'xlsx'})})}catch(x){if(!x||x.code!=='declined')msg='ساخت فایل اکسل انجام نشد.'}}
+const unitSel=(idAttr,val,extra)=>`<select ${idAttr} ${extra||''} style="width:100%;margin-bottom:10px"><option value="">بدون واحد</option>${cat.map(x=>`<option value="${esc(x.id)}"${x.id===val?' selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+const savePerson=(id,patch)=>{const p=people.find(x=>x.id===id),{id:_,...b}=p;return db.doc('people/'+id).set({...b,...patch})};
+async function setUnit(id,n,u){try{if(id)await savePerson(id,{unit:u});else await db.collection('people').add({name:n,unit:u,edu:'',items:[],order:Date.now()})}catch(x){msg='تغییر واحد انجام نشد؛ دسترسی مدیر لازم است.';render(true)}}
+function peo(){const R=roster();R.forEach((o,i)=>o.k=i);const inU=(o,id)=>id?o.u===id:!cat.some(x=>x.id===o.u),cnt=id=>R.filter(o=>inU(o,id)).length;
+const units=[...cat.map(x=>({id:x.id,name:x.name})),{id:'',name:'بدون واحد'}].filter(u=>u.id||cnt(''));
+if(!units.some(u=>u.id===pv))pv=(units.find(u=>cnt(u.id))||units[0]||{id:''}).id;const L=R.filter(o=>inU(o,pv));
+const f=admin?`<div class="card" style="margin-top:14px"><b>افزودن فرد</b><div style="height:12px"></div><input id="p_n" placeholder="نام و نام خانوادگی">${unitSel('id="p_u"',pv)}<button class="acc" data-a="addp" style="width:100%">افزودن</button></div>`:'';
+const it=(i,o,x)=>`<div style="padding:8px 0;border-top:1px solid var(--bd);display:flex;justify-content:space-between;gap:8px"><div><div style="font-size:14px;font-weight:600">${esc(i.t)}</div><div class="mu">${[i.k,i.y&&fa(i.y),i.d,i.s,i.e].filter(Boolean).map(esc).join(' · ')}</div></div>${admin&&o&&o.id?`<button data-a="rdel" data-id="${esc(o.id)}" data-i="${x}" style="min-height:36px;padding:0 12px;color:var(--not);align-self:flex-start">${pend==='rdel'+o.id+x?'تأیید حذف':'حذف'}</button>`:''}</div>`;
+const form=o=>admin?`<div style="margin-top:12px;border-top:1px solid var(--bd);padding-top:12px"><b style="font-size:13px">افزودن دوره به شناسنامه</b><div style="height:10px"></div><input id="rt${o.k}" placeholder="عنوان دوره"><input id="rd${o.k}" placeholder="مدت (مثلاً ۵ ساعت)"><input id="rs${o.k}" placeholder="نمره (اختیاری)"><input id="ry${o.k}" placeholder="سال (مثلاً ۱۴۰۵)"><select id="rk${o.k}" style="width:100%;margin-bottom:10px"><option>شغلی</option><option>بهبود مدیریت</option><option>عمومی</option></select><input id="re${o.k}" placeholder="مجری دوره"><button class="acc" data-a="addr" data-k="${o.k}" style="width:100%">افزودن به شناسنامه</button><div class="mu" style="margin:12px 0 6px">واحد این فرد</div>${unitSel('data-a="pu" data-id="'+esc(o.id)+'" data-n="'+esc(o.n)+'"',o.u)}${o.id?delb('people',o.id):''}</div>`:'';
+const row=o=>`<details class="p" data-n="${esc(o.n)}" style="display:block"${opn.has(o.n)?' open':''}><summary style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px"><span><b>${esc(o.n)}</b><div class="mu">${fa(o.rec.length+o.cs.size)} دوره · ${fa(o.pr)} جلسه حاضر در اپ · ${fa(o.ab)} غایب</div></span>${admin&&o.id?`<button data-a="del" data-k="people" data-id="${esc(o.id)}" onclick="event.preventDefault()" style="min-height:36px;padding:0 12px;color:var(--not)">${pend==='people'+o.id?'تأیید حذف':'حذف'}</button>`:''}</summary><div style="margin-top:8px">${o.edu?`<div class="mu" style="margin-bottom:6px">مدرک تحصیلی: ${esc(o.edu)}</div>`:''}${o.rec.map((i,x)=>it(i,o,x)).join('')}${[...o.cs].map(t=>it({t,k:'دوره در واحد آموزش'})).join('')}${o.rec.length||o.cs.size?'':'<div class="mu">هنوز دوره‌ای ثبت نشده است.</div>'}<button data-a="xp" data-k="${o.k}" style="width:100%;margin-top:10px">خروجی اکسل این نفر</button>${form(o)}</div></details>`;
+return head('شناسنامه آموزشی','نفرات هر واحد؛ واحد را انتخاب کنید و برای دیدن یا تکمیل سابقه روی نام لمس کنید')+`<select data-a="pv" style="margin-bottom:14px;max-width:100%">${units.map(u=>`<option value="${esc(u.id)}"${u.id===pv?' selected':''}>${esc(u.name)} (${fa(cnt(u.id))} نفر)</option>`).join('')}</select><div class="row" style="margin-bottom:14px"><button data-a="xu">خروجی اکسل این واحد</button><button data-a="xa">خروجی اکسل همه واحدها</button></div><div class="card">${L.map(row).join('')||'<div class="mu">فردی در این واحد ثبت نشده است.</div>'}</div>${f}<div class="mu" style="margin-top:8px">${esc(msg)}</div>`}
+function libv(){return head('کتابخانه','کتابخانه فنی و منابع آموزشی')+`<a href="https://mahdifallahazad7-bit.github.io/library/" target="_blank" rel="noopener" style="text-decoration:none"><div class="card" style="margin-bottom:14px;background:var(--pri);color:#fff;border:0"><div style="font-size:12px;opacity:.8">کتابخانه فنی</div><div style="font-size:20px;font-weight:800;margin:4px 0">کتابخانه فنی ایستا نوآوران نیرو</div><div style="font-size:13px;opacity:.85">کتاب‌ها، جزوه‌ها و فایل‌های PDF · باز شدن در صفحه جدید</div></div></a>`}
+const cnm=id=>(courses[id]||{}).title||'عمومی';
+const csel2=(attr,all)=>`<select ${attr} style="width:100%;margin-bottom:10px"><option value="">${all}</option>${cl().map(k=>`<option value="${esc(k)}">${esc(courses[k].title)}</option>`).join('')}</select>`;
+const cfil=(a,v)=>`<select data-a="${a}" style="margin-bottom:14px;max-width:100%"><option value="">همه دوره‌ها</option>${cl().map(k=>`<option value="${esc(k)}"${k===v?' selected':''}>${esc(courses[k].title)}</option>`).join('')}</select>`;
+const fdb=(k,id)=>admin?`<button data-a="fdel" data-k="${k}" data-id="${esc(id)}" style="min-height:34px;padding:0 10px;color:var(--not);margin-top:6px">${pend===k+id?'تأیید حذف':'حذف'}</button>`:'';
+function galV(){const L=photos.filter(x=>!gc||x.course===gc);
+const f=admin?`<div class="card" style="margin-top:14px"><b>افزودن عکس</b><div style="height:12px"></div>${csel2('id="g_c"','بدون دوره (عمومی)')}<input id="g_t" placeholder="توضیح عکس (اختیاری)"><input id="g_f" type="file" accept="image/*" multiple><button class="acc" data-a="upg" style="width:100%">بارگذاری عکس‌ها</button></div>`:'';
+return head('گالری عکس دوره‌ها','عکس‌های کلاس‌ها و دوره‌های آموزشی')+cfil('gc',gc)+(L.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">${L.map(x=>`<div class="card" style="padding:8px"><img data-a="lbo" data-id="${esc(x.asset)}" src="${blobUrl(x.asset)}" alt="${esc(x.caption||'عکس دوره')}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;display:block;cursor:zoom-in"><div style="font-size:12px;margin-top:6px">${esc(x.caption||'')}</div><div class="mu" style="font-size:11px">${esc(cnm(x.course))}</div>${fdb('photos',x.id)}</div>`).join('')}</div>`:'<div class="card mu">هنوز عکسی اضافه نشده است.</div>')+f+`<div class="mu" style="margin-top:8px">${esc(msg)}</div>`}
+function resV(){const L=lib.filter(x=>!rc||x.course===rc);
+const f=admin?`<div class="card" style="margin-top:14px"><b>افزودن جزوه، فیلم یا فایل</b><div style="height:12px"></div>${csel2('id="r_c"','بدون دوره (عمومی)')}<input id="r_t" placeholder="عنوان"><textarea id="r_n" placeholder="توضیح (اختیاری)"></textarea><input id="r_l" placeholder="لینک (اختیاری)"><input id="r_f" type="file" accept="image/*,application/pdf,video/mp4,video/webm,text/plain,text/csv,text/markdown"><div class="mu" style="margin-bottom:10px">فایل‌های مجاز: PDF، ویدیو (mp4 یا webm)، تصویر و متن؛ حداکثر ۲۰ مگابایت. فایل ورد و پاورپوینت را به PDF تبدیل کنید یا لینکش را بگذارید.</div><button class="acc" data-a="upr" style="width:100%">افزودن</button></div>`:'';
+const show=x=>{const id=esc(x.asset||''),u=blobUrl(id),t=x.type||'',dl=`<button data-a="dl" data-id="${id}" data-n="${esc(x.title)}" data-t="${esc(t)}" style="margin-top:8px">دانلود فایل</button>`;return (x.asset?(t.startsWith('video/')?`<video controls preload="metadata" src="${u}" style="width:100%;border-radius:10px;margin-top:8px"></video>${dl}`:t.startsWith('image/')?`<img data-a="lbo" data-id="${id}" src="${u}" alt="${esc(x.title)}" style="width:100%;border-radius:10px;margin-top:8px;cursor:zoom-in"><div>${dl}</div>`:`<div>${dl}</div>`):'')+(/^https?:\/\//.test(x.link||'')?`<div><a href="${esc(x.link)}" target="_blank" rel="noopener" style="color:var(--acc);font-size:14px;display:inline-block;margin-top:8px">باز کردن لینک</a></div>`:'')};
+return head('جزوه و فیلم‌های آموزشی','جزوه، فیلم آموزشی و فایل‌های هر دوره')+cfil('rc',rc)+(L.length?L.map(x=>`<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(x.title)}</b></div><div class="mu">${esc(cnm(x.course))}</div>${x.note?`<div style="margin-top:6px;font-size:14px">${esc(x.note)}</div>`:''}${show(x)}${fdb('library',x.id)}</div>`).join(''):'<div class="card mu">هنوز موردی اضافه نشده است.</div>')+f+`<div class="mu" style="margin-top:8px">${esc(msg)}</div>`}
+const slab=s=>{const c=courses[s.course];return (cat.find(x=>x.id===s.group)||{}).name||(c?(sgs(c)[s.group]||s.group):s.group)};
+function mkx(sh){const wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};sh.forEach(([n,h,r])=>{const ws=XLSX.utils.aoa_to_sheet([h,...r]);ws['!cols']=h.map((_,i)=>({wch:i===0||i===1?30:14}));XLSX.utils.book_append_sheet(wb,ws,n.slice(0,31).replace(/[:*?\/\\\[\]]/g,' '))});return wb}
+const PAL={blue:['آبی',{side:'#12365A',pri:'#12365A',acc:'#E08A2B'},{side:'#0A2038',pri:'#3F78AE',acc:'#E08A2B'}],green:['سبز',{side:'#14452F',pri:'#14452F',acc:'#C97A1E'},{side:'#0B2A1D',pri:'#2F8458',acc:'#C97A1E'}],purple:['بنفش',{side:'#3B2A73',pri:'#3B2A73',acc:'#C97A1E'},{side:'#1E1540',pri:'#6B54C2',acc:'#C97A1E'}],red:['زرشکی',{side:'#7A1F2B',pri:'#7A1F2B',acc:'#2F6F8F'},{side:'#3A0F15',pri:'#B14558',acc:'#2F6F8F'}],slate:['خاکستری',{side:'#1F2937',pri:'#1F2937',acc:'#0E8577'},{side:'#0B1118',pri:'#64748B',acc:'#0E8577'}]};
+let TH={a:'blue',m:'auto',l:'classic'};try{TH={...TH,...JSON.parse(localStorage.getItem('th')||'{}')}}catch(e){}
+function applyTheme(){const r=document.documentElement,dk=TH.m==='dark'||(TH.m==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);if(TH.m==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',TH.m);const p=(PAL[TH.a]||PAL.blue)[dk?2:1];['side','pri','acc'].forEach(k=>r.style.setProperty('--'+k,p[k]));if(TH.l&&TH.l!=='classic')r.setAttribute('data-layout',TH.l);else r.removeAttribute('data-layout');document.getElementById('sw').innerHTML=Object.keys(PAL).map(k=>`<button class="sw${k===TH.a?' on':''}" data-a="acc" data-v="${k}" aria-label="${PAL[k][0]}" style="background:${PAL[k][1].pri}"></button>`).join('');document.querySelectorAll('.md button').forEach(b=>b.classList.toggle('on',b.dataset.v===TH.m));document.querySelectorAll('.ly button').forEach(b=>b.classList.toggle('on',b.dataset.v===TH.l))}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]'),a=b&&b.dataset.a,p=document.getElementById('tp');if(!e.target.closest('#tp')&&a!=='tp')p.hidden=true;if(a==='tp')p.hidden=!p.hidden;else if(a==='acc'||a==='mode'||a==='lay'){if(a==='acc')TH.a=b.dataset.v;else if(a==='lay')TH.l=b.dataset.v;else TH.m=b.dataset.v;try{localStorage.setItem('th',JSON.stringify(TH))}catch(x){}applyTheme()}});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);applyTheme();
+const $m=document.getElementById('m');
+let pendR=false,lb='';
+function render(f){const a=document.activeElement;if(!f&&a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.type!=='file'&&$m.contains(a)){pendR=true;return}pendR=false;const v=view();document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('on',x.dataset.v===v));$m.innerHTML=({dash,courses:coursesV,catalog:catV,gallery:galV,res:resV,att:attv,survey:sur,people:peo,lib:libv})[v]()+(lb?`<div data-a="lbc" style="position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box"><img src="${blobUrl(lb)}" alt="" style="max-width:100%;max-height:100%;object-fit:contain"><button data-a="lbc" style="position:absolute;top:calc(14px + env(safe-area-inset-top,0px));inset-inline-end:14px;background:#fff;color:#000;border:0">بستن</button></div>`:'')}
+const val=id=>(document.getElementById(id)||{value:''}).value.trim(),lines=t=>t.split('\n').map(x=>x.trim()).filter(Boolean);
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b||/^(SELECT|INPUT|TEXTAREA|OPTION)$/.test(b.tagName)||/^(SELECT|INPUT|TEXTAREA|OPTION)$/.test(e.target.tagName))return;const a=b.dataset.a;msg='';
+try{if(a==='t')marks.v[+b.dataset.i]^=1;else if(a==='a')ans[+b.dataset.i]=+b.dataset.v;else if(a==='again'){done=false;ans=Array(13).fill(0)}
+else if(a==='save'){await db.doc('attendance/'+marks.id).set({course:cid,group:sg,session:+ss,marks:marks.v,at:Date.now()});msg='ذخیره شد.'}
+else if(a==='send'){await db.collection('surveys').add({course:cid,group:sgrp,scores:ans.slice(),at:Date.now()});done=true}
+else if(a==='del'){const k=b.dataset.k,id=b.dataset.id;if(pend===k+id){if(k==='cdel'){const [uid,c]=id.split('|'),{id:_,...r}=cat.find(x=>x.id===uid);await db.doc('catalog/'+uid).set({...r,items:r.items.filter(i=>i.c!==c)})}else await db.doc(k+'/'+id).delete();pend=''}else pend=k+id}
+else if(a==='cadd'){const t=val('c_t'),u=cat.find(x=>x.id===cu)||cat[0];if(!t)msg='عنوان را وارد کنید.';else{const used=new Set(u.items.map(i=>i.c));let n=1,code;do{code=u.prefix+'-'+String(n).padStart(3,'0');n++}while(used.has(code));const {id:_,...r}=u;await db.doc('catalog/'+u.id).set({...r,items:[...r.items,{c:code,t}].sort((x,y)=>x.c.localeCompare(y.c))});msg='افزوده شد.';document.getElementById('c_t').value=''}}
+else if(a==='addc'){const groups={};[1,2,3].forEach(i=>{const m=lines(val('g'+i+'m')),n=val('g'+i+'n');if(n&&m.length)groups['g'+i]={name:n,members:m}});
+if(!val('f_t')||!Object.keys(groups).length){msg='نام دوره و حداقل یک گروه (با نام و اسامی افراد) لازم است.'}else{await db.collection('courses').add({title:val('f_t'),code:val('f_c'),instructor:val('f_i'),sessions:lines(val('f_d')).length?lines(val('f_d')):['—'],groups,createdAt:Date.now()});msg='دوره ثبت شد.';['f_t','f_c','f_i','f_d','g1n','g1m','g2n','g2m','g3n','g3m'].forEach(i=>{const x=document.getElementById(i);if(x)x.value=''})}}
+else if(a==='addr'){const o=roster()[+b.dataset.k],g=i=>(document.getElementById(i+o.k)||{value:''}).value.trim();if(!g('rt'))msg='عنوان دوره را وارد کنید.';else{const item={t:g('rt'),d:g('rd'),s:g('rs'),y:g('ry'),k:g('rk'),e:g('re')};if(o.id)await savePerson(o.id,{items:[...o.rec,item]});else await db.collection('people').add({name:o.n,unit:'',edu:'',items:[item],order:Date.now()});opn.add(o.n);msg='به شناسنامه اضافه شد.'}}
+else if(a==='rdel'){const id=b.dataset.id,i=+b.dataset.i,key='rdel'+id+i;if(pend===key){const p=people.find(x=>x.id===id);await savePerson(id,{items:(p.items||[]).filter((_,j)=>j!==i)});pend=''}else pend=key}
+else if(a==='mdel'){const i=+b.dataset.i,key='mdel'+cid+sg+i;if(pend===key){const c=courses[cid],g=c.groups[sg];await db.doc('courses/'+cid).set({...c,groups:{...c.groups,[sg]:{...g,members:g.members.filter((_,j)=>j!==i)}}});for(const [k,a2] of Object.entries(att))if(a2.course===cid&&a2.group===sg)await db.doc('attendance/'+k).set({...a2,marks:a2.marks.filter((_,j)=>j!==i)});marks=null;pend=''}else pend=key}
+else if(a==='xu'){const L=roster().filter(o=>pv?o.u===pv:!cat.some(x=>x.id===o.u)),nm=(cat.find(x=>x.id===pv)||{}).name||'بدون واحد';await xout(mkb([[nm,rows(L)]]),'شناسنامه آموزشی - '+nm)}
+else if(a==='xa'){const R=roster(),sh=[...cat.map(x=>[x.name,R.filter(o=>o.u===x.id)]),['بدون واحد',R.filter(o=>!cat.some(x=>x.id===o.u))]].filter(x=>x[1].length).map(x=>[x[0],rows(x[1])]);await xout(mkb(sh),'شناسنامه آموزشی - همه واحدها')}
+else if(a==='xp'){const o=roster()[+b.dataset.k];await xout(mkb([[o.n,rows([o])]]),'شناسنامه آموزشی - '+o.n)}
+else if(a==='xcu'){const u=cat.find(x=>x.id===cu)||cat[0];await xout(mkx([[u.name,['کد','عنوان دوره','وضعیت'],u.items.map(i=>[i.c,i.t,doneN(i.c)?'برگزار شد':'در انتظار'])]]),'دوره‌های مورد نیاز - '+u.name)}
+else if(a==='xca'){await xout(mkx(cat.map(u=>[u.name,['کد','عنوان دوره','وضعیت'],u.items.map(i=>[i.c,i.t,doneN(i.c)?'برگزار شد':'در انتظار'])])),'دوره‌های مورد نیاز - همه واحدها')}
+else if(a==='xat'){const c=C(),ss2=sess(c);await xout(mkx(Object.keys(c.groups).map(k=>{const g=c.groups[k];return [g.name,['ردیف','نام و نام خانوادگی',...ss2.map((d,i)=>'جلسه '+(i+1)+' - '+d),'تعداد حضور'],g.members.map((n,i)=>{const ms=ss2.map((_,j)=>{const x=att[cid+'_'+k+'_'+(j+1)];return x?(x.marks[i]?'✔':'✘'):''});return [i+1,n,...ms,ms.filter(v=>v==='✔').length]})]})),'حضور و غیاب - '+c.title)}
+else if(a==='xsv'){const q=Q,labs=[...new Set(sv.map(slab))],av=a2=>a2.length?+(a2.reduce((x,y)=>x+y,0)/a2.length).toFixed(2):'';await xout(mkx([['خلاصه',['سؤال','میانگین کل',...labs],q.map((t,i)=>[t,av(sv.map(r=>r.scores[i]).filter(Boolean)),...labs.map(l=>av(sv.filter(r=>slab(r)===l).map(r=>r.scores[i]).filter(Boolean)))])],['پاسخ‌ها',['دوره','واحد',...q.map((_,i)=>'سؤال '+(i+1)),'میانگین'],sv.map(r=>[cnm(r.course),slab(r),...r.scores,av(r.scores)])]]),'نتایج نظرسنجی')}
+else if(a==='upg'||a==='upr'){const g=a==='upg',fi=document.getElementById(g?'g_f':'r_f'),fs=[...(fi&&fi.files||[])],cs=(document.getElementById(g?'g_c':'r_c')||{}).value||'',cap=val(g?'g_t':'r_t'),note=val('r_n'),link=val('r_l');
+if(!g&&!cap)msg='عنوان را وارد کنید.';else if(g&&!fs.length)msg='ابتدا عکس‌ها را انتخاب کنید.';else if(!g&&!fs.length&&!link)msg='فایل یا لینک را وارد کنید.';
+else{const as=await claude.use('assets');if(fs.length&&!as)msg='دسترسی بارگذاری فایل ندارید.';else{msg='در حال بارگذاری…';render(true);let n=0;try{for(const f of(fs.length?fs:[null])){let id='',ty='';if(f){const r=await as.upload(f);id=r.id;ty=f.type||r.contentType||''}
+await db.collection(g?'photos':'library').add(g?{course:cs,caption:cap,asset:id,type:ty,at:Date.now()}:{course:cs,title:cap,note,link,asset:id,type:ty,at:Date.now()});n++}msg=fa(n)+' مورد بارگذاری شد.'}catch(x){msg=(n?fa(n)+' مورد بارگذاری شد، ولی ':'')+(x&&x.code==='unsupported_type'?'نوع این فایل پشتیبانی نمی‌شود.':'بارگذاری کامل نشد؛ عکس‌ها خودکار کوچک می‌شوند و سایر فایل‌ها حداکثر حدود ۹۰۰ کیلوبایت باشند؛ فایل بزرگ‌تر را با لینک اضافه کنید.')}}}}
+else if(a==='lbo')lb=b.dataset.id;
+else if(a==='lbc')lb='';
+else if(a==='dl'){const r=await fetch(blobUrl(b.dataset.id));if(!r.ok)throw 0;const buf=await r.arrayBuffer(),d=await claude.use('downloads'),ex={'application/pdf':'.pdf','video/mp4':'.mp4','video/webm':'.webm','image/jpeg':'.jpg','image/png':'.png','image/webp':'.webp','image/gif':'.gif','text/plain':'.txt','text/csv':'.csv','text/markdown':'.md'}[b.dataset.t]||'';if(!d)msg='ذخیره فایل در این نمایش ممکن نیست.';else await d.save({filename:(b.dataset.n||'file').replace(/[:*?"<>|\/\\]/g,' ')+ex,data:buf})}
+else if(a==='fdel'){const k=b.dataset.k,id=b.dataset.id,key=k+id;if(pend===key){const x=(k==='photos'?photos:lib).find(y=>y.id===id);try{const as=await claude.use('assets');if(as&&x&&x.asset)await as.delete(x.asset)}catch(e){}await db.doc(k+'/'+id).delete();pend=''}else pend=key}
+else if(a==='addp'){if(!val('p_n'))msg='نام را وارد کنید.';else{await db.collection('people').add({name:val('p_n'),unit:val('p_u'),edu:'',items:[],order:Date.now()});msg='ثبت شد.';document.getElementById('p_n').value='';document.getElementById('p_u').value=''}}
+else if(a==='addl'){if(!val('l_t'))msg='عنوان را وارد کنید.';else{await db.collection('library').add({title:val('l_t'),link:val('l_l'),note:val('l_n'),at:Date.now()});msg='ثبت شد.';['l_t','l_l','l_n'].forEach(i=>document.getElementById(i).value='')}}}
+catch(x){msg='انجام نشد؛ دسترسی مدیر لازم است یا ارتباط قطع است.'}
+document.activeElement&&document.activeElement.blur&&0;render(true)});
+document.addEventListener('change',e=>{const a=e.target.dataset.a,v=e.target.value;if(a==='fg'){const i=e.target.dataset.g,u=cat.find(x=>x.id===v);if(u){const nm=roster().filter(o=>o.u===v).map(o=>o.n),t=document.getElementById('g'+i+'m'),n=document.getElementById('g'+i+'n');t.value=(t.value?t.value.trim()+'\n':'')+nm.join('\n');if(!n.value)n.value=u.name}e.target.value='';return}
+if(a==='pu'){setUnit(e.target.dataset.id,e.target.dataset.n,v);return}if(a==='c'){cid=v;marks=null;ans=Array(13).fill(0);done=false;sg='';sgrp='';ss='1'}else if(a==='g'){sg=v;marks=null}else if(a==='s'){ss=v;marks=null}else if(a==='sg')sgrp=v;else if(a==='cu')cu=v;else if(a==='pv')pv=v;else if(a==='gc')gc=v;else if(a==='rc')rc=v;else return;render(true)});
+document.addEventListener('input',e=>{if(e.target.id==='f_c'){const h=cat.flatMap(u=>u.items).find(i=>i.c===e.target.value.trim()),t=document.getElementById('f_t');if(h&&t&&!t.value)t.value=h.t}});
+document.addEventListener('toggle',e=>{const n=e.target.dataset&&e.target.dataset.n;if(n){e.target.open?opn.add(n):opn.delete(n)}},true);
+document.addEventListener('focusout',()=>{if(pendR)setTimeout(()=>render(),60)});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&lb){lb='';render(true)}});
+window.addEventListener('hashchange',()=>{msg='';pend='';render(true)});render();
+const sub=(path,fn)=>db.collection(path).onSnapshot(s=>{fn(s);render()},()=>{});
+(async()=>{try{const u=await claude.use('user');admin=u?await u.canEdit():false;db=await claude.use('db');if(!db){render();return}
+sub('courses',s=>{courses={};s.docs.forEach(d=>courses[d.id]=d.data())});sub('attendance',s=>{att={};s.docs.forEach(d=>att[d.id]=d.data());marks=null});sub('surveys',s=>{sv=s.docs.map(d=>d.data())});
+sub('photos',s=>{photos=s.docs.map(d=>({...d.data(),id:d.id})).sort((x,y)=>(y.at||0)-(x.at||0))});sub('catalog',s=>{cat=s.docs.map(d=>({...d.data(),id:d.id})).sort((x,y)=>(x.order||0)-(y.order||0))});sub('people',s=>{people=s.docs.map(d=>({...d.data(),id:d.id})).sort((x,y)=>(x.order||0)-(y.order||0))});sub('library',s=>{lib=s.docs.map(d=>({...d.data(),id:d.id})).sort((x,y)=>(y.at||0)-(x.at||0))})}catch(x){render()}})();
+</script></body></html>
