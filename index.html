@@ -55,8 +55,11 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
   const fireAll=()=>[...new Set(subs.map(x=>x.p))].forEach(fire);
   const API=p=>'https://api.github.com/repos/'+C.owner+'/'+C.repo+'/contents/'+p;
   const hd=(a)=>({Accept:a||'application/vnd.github+json',Authorization:'Bearer '+token,'Content-Type':'application/json'});
+  const fT=(u,o,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||8000);return fetch(u,{...(o||{}),signal:c.signal}).finally(()=>clearTimeout(t))};
   async function getText(path){
-    const r=token?await fetch(API(path)+'?ref='+C.branch+'&t='+Date.now(),{headers:hd('application/vnd.github.raw+json')}):await fetch(path+'?t='+Date.now());
+    let r=null;
+    if(token){try{r=await fT(API(path)+'?ref='+C.branch+'&t='+Date.now(),{headers:hd('application/vnd.github.raw+json')})}catch(e){r=null}}
+    if(!r||(!r.ok&&r.status!==404))r=await fT(path+'?t='+Date.now());
     if(r.status===404)return null; if(!r.ok)throw 0; return r.text();
   }
   async function put(path,text){
@@ -111,16 +114,18 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
 
   window.__authReady=(async()=>{
     if(!GH){try{S=JSON.parse(localStorage.getItem('ea_local_db')||'{}')}catch(e){}return}
-    if(token){try{const r=await fetch('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:hd()});admin=r.ok&&!!(await r.json()).permissions?.push}catch(e){admin=false}if(!admin)token=''}
+    let neterr=false;
+    if(token){try{const r=await fT('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:hd()});admin=r.ok&&!!(await r.json()).permissions?.push}catch(e){admin=false;neterr=true}if(!admin)token=''}
     btn=document.createElement('button');
     btn.style.cssText='position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:50;padding:6px 12px;border-radius:8px;border:1px solid #8884;background:#fff;color:#12263F;font:12px Vazirmatn,Tahoma;opacity:.85';
-    btn.textContent=admin?'قفل کردن (خروج مدیر)':'ورود مدیر';
+    btn.textContent=admin?'قفل کردن (خروج مدیر)':(neterr?'ورود مدیر (اتصال به گیت‌هاب برقرار نیست؛ لمس کنید)':'ورود مدیر');
     const b64=a=>btoa(String.fromCharCode(...new Uint8Array(a))), ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
     const dk=async(pw,salt)=>{const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])};
     const lockTok=async(t,pw)=>{const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await dk(pw,salt),new TextEncoder().encode(t));return JSON.stringify([b64(salt),b64(iv),b64(ct)])};
     const openTok=async(s,pw)=>{const[x,y,z]=JSON.parse(s).map(ub);return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:y},await dk(pw,x),z))};
-    const canPush=async t=>{const r=await fetch('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:{Authorization:'Bearer '+t}});return r.ok&&!!(await r.json()).permissions?.push};
+    const canPush=async t=>{const r=await fT('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:{Authorization:'Bearer '+t}});return r.ok&&!!(await r.json()).permissions?.push};
     btn.onclick=async()=>{
+      if(neterr){location.reload();return}
       if(admin){try{localStorage.removeItem('ea_gh_token')}catch(e){}location.reload();return}
       try{
         let enc=localStorage.getItem('ea_gh_enc'), t='';
