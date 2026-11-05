@@ -114,12 +114,26 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
     if(token){try{const r=await fetch('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:hd()});admin=r.ok&&!!(await r.json()).permissions?.push}catch(e){admin=false}if(!admin)token=''}
     btn=document.createElement('button');
     btn.style.cssText='position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:50;padding:6px 12px;border-radius:8px;border:1px solid #8884;background:#fff;color:#12263F;font:12px Vazirmatn,Tahoma;opacity:.85';
-    btn.textContent=admin?'خروج از حالت مدیر':'ورود مدیر';
+    btn.textContent=admin?'قفل کردن (خروج مدیر)':'ورود مدیر';
+    const b64=a=>btoa(String.fromCharCode(...new Uint8Array(a))), ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+    const dk=async(pw,salt)=>{const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])};
+    const lockTok=async(t,pw)=>{const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await dk(pw,salt),new TextEncoder().encode(t));return JSON.stringify([b64(salt),b64(iv),b64(ct)])};
+    const openTok=async(s,pw)=>{const[x,y,z]=JSON.parse(s).map(ub);return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:y},await dk(pw,x),z))};
+    const canPush=async t=>{const r=await fetch('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:{Authorization:'Bearer '+t}});return r.ok&&!!(await r.json()).permissions?.push};
     btn.onclick=async()=>{
       if(admin){try{localStorage.removeItem('ea_gh_token')}catch(e){}location.reload();return}
-      const t=prompt('توکن گیت‌هاب را وارد کنید:');if(!t)return;
-      try{const r=await fetch('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:{Authorization:'Bearer '+t.trim()}});
-        if(r.ok&&(await r.json()).permissions?.push){localStorage.setItem('ea_gh_token',t.trim());location.reload()}else alert('این توکن اجازه نوشتن در این repo را ندارد.')}catch(e){alert('اتصال به گیت‌هاب برقرار نشد.')}
+      try{
+        let enc=localStorage.getItem('ea_gh_enc'), t='';
+        if(enc){
+          const pw=prompt('رمز مدیر را وارد کنید:\n(اگر فراموش کردید، کلمه «توکن» را بنویسید)'); if(!pw)return;
+          if(pw.trim()!=='توکن'){try{t=await openTok(enc,pw)}catch(e){alert('رمز اشتباه است.');return}}
+          else{localStorage.removeItem('ea_gh_enc');enc=null}
+        }
+        if(!t){t=(prompt('توکن گیت‌هاب را وارد کنید:')||'').trim();if(!t)return}
+        if(!(await canPush(t))){alert('این توکن اجازه نوشتن در این repo را ندارد.');return}
+        if(!enc){const pw=prompt('یک رمز کوتاه برای ورودهای بعدی انتخاب کنید (دفعه بعد فقط همین را می‌زنید):');if(pw)localStorage.setItem('ea_gh_enc',await lockTok(t,pw))}
+        localStorage.setItem('ea_gh_token',t);location.reload();
+      }catch(e){alert('اتصال به گیت‌هاب برقرار نشد.')}
     };
     document.addEventListener('DOMContentLoaded',()=>document.body.appendChild(btn));
     if(document.body)document.body.appendChild(btn);
