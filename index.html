@@ -78,7 +78,7 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
   }
   async function put(path,text){
     const m=await fetch(API(path)+'?ref='+C.branch,{headers:hd()}); const body={message:'update',content:enc(text),branch:C.branch};
-    if(m.ok)body.sha=(await m.json()).sha; const r=await fetch(API(path),{method:'PUT',headers:hd(),body:JSON.stringify(body)}); if(!r.ok)throw 0;
+    if(m.ok)body.sha=(await m.json()).sha; const r=await fetch(API(path),{method:'PUT',headers:hd(),body:JSON.stringify(body)}); if(!r.ok){let g='';try{g=(await r.json()).message||''}catch(e){}throw{status:r.status,msg:g}}
   }
   async function del(path){const m=await fetch(API(path)+'?ref='+C.branch,{headers:hd()});if(!m.ok)return;await fetch(API(path),{method:'DELETE',headers:hd(),body:JSON.stringify({message:'delete',sha:(await m.json()).sha,branch:C.branch})})}
   function persist(){
@@ -87,7 +87,7 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
   }
   async function flush(){
     if(saving){st=setTimeout(flush,700);return} saving=true; const v=ver;
-    try{await put('data.json',JSON.stringify(S));saved=v}catch(e){alert('ذخیره در گیت‌هاب انجام نشد. اینترنت یا توکن را بررسی کنید.')}
+    try{await put('data.json',JSON.stringify(S));saved=v}catch(e){const s=e&&e.status,h=s===401?'توکن نامعتبر یا منقضی شده است؛ از «قفل کردن» خارج و دوباره وارد شوید یا توکن جدید بسازید.':(s===403||s===404)?'توکن اجازه نوشتن در repo «'+C.repo+'» را ندارد. توکن باید برای همین repo دسترسی Contents: Read and write داشته باشد.':(s===409||s===422)?'تداخل در ذخیره یا نام شاخه (branch) اشتباه است؛ صفحه را دوباره باز کنید و تغییر را تکرار کنید.':'اتصال به گیت‌هاب برقرار نشد؛ اینترنت را بررسی کنید.';alert('ذخیره در گیت‌هاب انجام نشد.\n'+h+'\n(کد: '+(s||'شبکه')+(e&&e.msg?' - '+e.msg:'')+')')}
     saving=false; if(saved<ver&&saved===v)flush();
   }
   async function load(){
@@ -138,7 +138,7 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
   window.__authReady=(async()=>{
     if(!GH){try{S=JSON.parse(localStorage.getItem('ea_local_db')||'{}')}catch(e){}return}
     let neterr=false;
-    if(token){try{const r=await fT('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:hd()});admin=r.ok&&!!(await r.json()).permissions?.push}catch(e){admin=false;neterr=true}if(!admin)token=''}
+    if(token){try{const r=await fT('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:hd()});const j=r.ok?await r.json():{};admin=r.ok&&!!j.permissions?.push;if(j.default_branch)C.branch=j.default_branch}catch(e){admin=false;neterr=true}if(!admin)token=''}
     btn=document.createElement('button');
     btn.style.cssText='position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:50;padding:6px 12px;border-radius:8px;border:1px solid #8884;background:#fff;color:#12263F;font:12px Vazirmatn,Tahoma;opacity:.85';
     btn.textContent=admin?'قفل کردن (خروج مدیر)':(neterr?'ورود مدیر (اتصال به گیت‌هاب برقرار نیست؛ لمس کنید)':'ورود مدیر');
@@ -197,11 +197,12 @@ const head=(t,s)=>`<h1>${t}</h1><div class="mu" style="margin-bottom:16px">${s||
 const csel=()=>cl().length>1?`<select data-a="c" style="margin-bottom:12px">${cl().map(k=>`<option value="${esc(k)}"${k===cid?' selected':''}>${esc(courses[k].title)}</option>`).join('')}</select>`:'';
 const held=id=>Object.values(att).some(a=>a.course===id);
 const nk=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/^INTR/,'').replace(/([A-Z]+)0*(\d+)/,'$1$2');
+const doneI=i=>{const t=nn(i.t);return doneN(i.c)||Object.values(courses).filter(c=>{const x=nn(c.title);return x&&t&&(x===t||(Math.min(x.length,t.length)>=8&&(x.includes(t)||t.includes(x))))}).length};
 const doneN=code=>Object.values(courses).filter(c=>[c.code,...(c.codes||[])].some(x=>x&&nk(x)===nk(code))).length;
 function catV(){const u=cat.find(x=>x.id===cu)||cat[0];if(!u)return head('دوره‌های مورد نیاز')+'<div class="mu">لیستی ثبت نشده است.</div>';
-const items=u.items||[],dn=items.filter(i=>doneN(i.c)).length;
+const items=u.items||[],dn=items.filter(i=>doneI(i)).length;
 const f=admin?`<div class="card" style="margin-top:14px"><b>افزودن دوره به این لیست</b><div style="height:12px"></div><input id="c_t" placeholder="عنوان دوره"><button class="acc" data-a="cadd" style="width:100%">افزودن</button></div>`:'';
-return head('دوره‌های مورد نیاز','لیست دوره‌های آموزشی و مهارت‌های مورد نیاز هر واحد')+`<select data-a="cu" style="margin-bottom:14px;max-width:100%">${cat.map(x=>`<option value="${esc(x.id)}"${x.id===u.id?' selected':''}>${esc(x.name)}</option>`).join('')}</select><div class="row" style="margin-bottom:14px"><button data-a="xcu">خروجی اکسل این واحد</button><button data-a="xca">خروجی اکسل همه واحدها</button></div><div class="card"><div class="mu" style="margin-bottom:6px">${fa(dn)} از ${fa(items.length)} دوره برگزار شده · فرم ${esc(u.form||'')}</div>${items.map(i=>`<div class="p"><div><div style="font-weight:600;font-size:14px">${esc(i.t)}</div><div class="mu" style="direction:ltr;text-align:right">${esc(i.c)}</div></div><div style="display:flex;gap:6px;align-items:center">${doneN(i.c)?chip('برگزار شد',okc):chip('در انتظار',plc)}${delb('cdel',u.id+'|'+i.c)}</div></div>`).join('')||'<div class="mu">دوره‌ای ثبت نشده است.</div>'}</div>${f}<div class="mu" style="margin-top:8px">${esc(msg)}</div>`}
+return head('دوره‌های مورد نیاز','لیست دوره‌های آموزشی و مهارت‌های مورد نیاز هر واحد')+`<select data-a="cu" style="margin-bottom:14px;max-width:100%">${cat.map(x=>`<option value="${esc(x.id)}"${x.id===u.id?' selected':''}>${esc(x.name)}</option>`).join('')}</select><div class="row" style="margin-bottom:14px"><button data-a="xcu">خروجی اکسل این واحد</button><button data-a="xca">خروجی اکسل همه واحدها</button></div><div class="card"><div class="mu" style="margin-bottom:6px">${fa(dn)} از ${fa(items.length)} دوره برگزار شده · فرم ${esc(u.form||'')}</div>${items.map(i=>`<div class="p"><div><div style="font-weight:600;font-size:14px">${esc(i.t)}</div><div class="mu" style="direction:ltr;text-align:right">${esc(i.c)}</div></div><div style="display:flex;gap:6px;align-items:center">${doneI(i)?chip('برگزار شد',okc):chip('در انتظار',plc)}${delb('cdel',u.id+'|'+i.c)}</div></div>`).join('')||'<div class="mu">دوره‌ای ثبت نشده است.</div>'}</div>${f}<div class="mu" style="margin-top:8px">${esc(msg)}</div>`}
 function evalCard(){
  if(!admin||!window.EV||!EV.people||!EV.people.length)return'';
  const T=EV.titles||{},pct=(a,b)=>b?Math.round(a*100/b):0;
@@ -290,9 +291,9 @@ return top+`<div class="card"><b>${esc(u.name||'')}</b> <span class="mu">· ${fa
 const nn=s=>String(s||'').replace(/[\u200c\s]/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک');
 function lev(a,b){const m=[...Array(a.length+1)].map((_,i)=>[i]);for(let j=1;j<=b.length;j++)m[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]}
 const same=(a,b)=>{a=nn(a);b=nn(b);return a===b||(Math.min(a.length,b.length)>=8&&(a.includes(b)||b.includes(a)||lev(a,b)<=1))};
-function roster(){const r=people.map(p=>({n:p.name,u:p.unit||'',id:p.id,edu:p.edu||'',pr:0,ab:0,cs:new Set(),rec:p.items||[]})),get=n=>{let o=r.find(x=>same(x.n,n));if(!o){o={n,u:'',id:'',edu:'',pr:0,ab:0,cs:new Set(),rec:[]};r.push(o)}return o};
-Object.values(courses).forEach(c=>Object.values(c.groups||{}).forEach(g=>(g.members||[]).forEach(n=>get(n).cs.add(c.title))));
-Object.values(att).forEach(a=>{const c=courses[a.course],g=c&&c.groups&&c.groups[a.group];if(!g)return;g.members.forEach((n,i)=>{const o=get(n);a.marks[i]?o.pr++:o.ab++})});
+function roster(){const r=people.map(p=>({n:p.name,u:p.unit||'',id:p.id,edu:p.edu||'',pr:0,ab:0,cs:new Set(),rec:p.items||[]})),get=n=>r.find(x=>same(x.n,n))||null;
+Object.values(courses).forEach(c=>Object.values(c.groups||{}).forEach(g=>(g.members||[]).forEach(n=>{const o=get(n);if(o)o.cs.add(c.title)})));
+Object.values(att).forEach(a=>{const c=courses[a.course],g=c&&c.groups&&c.groups[a.group];if(!g)return;g.members.forEach((n,i)=>{const o=get(n);if(o)a.marks[i]?o.pr++:o.ab++})});
 return r.sort((x,y)=>x.n.localeCompare(y.n,'fa'))}
 const opn=new Set();
 const H=['واحد','نام و نام خانوادگی','مدرک تحصیلی','عنوان دوره','مدت','نمره','سال','نوع','مجری دوره'];
@@ -375,8 +376,8 @@ else if(a==='mdel'){const i=+b.dataset.i,key='mdel'+cid+sg+i;if(pend===key){cons
 else if(a==='xu'){const L=roster().filter(o=>pv?o.u===pv:!cat.some(x=>x.id===o.u)),nm=(cat.find(x=>x.id===pv)||{}).name||'بدون واحد';await xout(mkb([[nm,rows(L)]]),'شناسنامه آموزشی - '+nm)}
 else if(a==='xa'){const R=roster(),sh=[...cat.map(x=>[x.name,R.filter(o=>o.u===x.id)]),['بدون واحد',R.filter(o=>!cat.some(x=>x.id===o.u))]].filter(x=>x[1].length).map(x=>[x[0],rows(x[1])]);await xout(mkb(sh),'شناسنامه آموزشی - همه واحدها')}
 else if(a==='xp'){const o=roster()[+b.dataset.k];await xout(mkb([[o.n,rows([o])]]),'شناسنامه آموزشی - '+o.n)}
-else if(a==='xcu'){const u=cat.find(x=>x.id===cu)||cat[0];await xout(mkx([[u.name,['کد','عنوان دوره','وضعیت'],u.items.map(i=>[i.c,i.t,doneN(i.c)?'برگزار شد':'در انتظار'])]]),'دوره‌های مورد نیاز - '+u.name)}
-else if(a==='xev'){await xout(evx(),'ارزیابی اولیه نیروها')}else if(a==='xca'){await xout(mkx(cat.map(u=>[u.name,['کد','عنوان دوره','وضعیت'],u.items.map(i=>[i.c,i.t,doneN(i.c)?'برگزار شد':'در انتظار'])])),'دوره‌های مورد نیاز - همه واحدها')}
+else if(a==='xcu'){const u=cat.find(x=>x.id===cu)||cat[0];await xout(mkx([[u.name,['کد','عنوان دوره','وضعیت'],u.items.map(i=>[i.c,i.t,doneI(i)?'برگزار شد':'در انتظار'])]]),'دوره‌های مورد نیاز - '+u.name)}
+else if(a==='xev'){await xout(evx(),'ارزیابی اولیه نیروها')}else if(a==='xca'){await xout(mkx(cat.map(u=>[u.name,['کد','عنوان دوره','وضعیت'],u.items.map(i=>[i.c,i.t,doneI(i)?'برگزار شد':'در انتظار'])])),'دوره‌های مورد نیاز - همه واحدها')}
 else if(a==='xat'){const c=C(),ss2=sess(c);await xout(mkx(Object.keys(c.groups).map(k=>{const g=c.groups[k];return [g.name,['ردیف','نام و نام خانوادگی',...ss2.map((d,i)=>'جلسه '+(i+1)+' - '+d),'تعداد حضور'],g.members.map((n,i)=>{const ms=ss2.map((_,j)=>{const x=att[cid+'_'+k+'_'+(j+1)];return x?(x.marks[i]?'✔':'✘'):''});return [i+1,n,...ms,ms.filter(v=>v==='✔').length]})]})),'حضور و غیاب - '+c.title)}
 else if(a==='xsv'){const q=Q,labs=[...new Set(sv.map(slab))],av=a2=>a2.length?+(a2.reduce((x,y)=>x+y,0)/a2.length).toFixed(2):'';await xout(mkx([['خلاصه',['سؤال','میانگین کل',...labs],q.map((t,i)=>[t,av(sv.map(r=>r.scores[i]).filter(Boolean)),...labs.map(l=>av(sv.filter(r=>slab(r)===l).map(r=>r.scores[i]).filter(Boolean)))])],['پاسخ‌ها',['دوره','واحد','نام',...q.map((_,i)=>'سؤال '+(i+1)),'میانگین'],sv.map(r=>[r.ctitle||cnm(r.course),slab(r),r.person||'',...r.scores,av(r.scores)])]]),'نتایج نظرسنجی')}
 else if(a==='upg'||a==='upr'){const g=a==='upg',fi=document.getElementById(g?'g_f':'r_f'),fs=[...(fi&&fi.files||[])],cs=(document.getElementById(g?'g_c':'r_c')||{}).value||'',cap=val(g?'g_t':'r_t'),note=val('r_n'),link=val('r_l');
