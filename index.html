@@ -77,10 +77,18 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
     if(r.status===404)return null; if(!r.ok)throw 0; return r.text();
   }
   async function put(path,text){
-    const m=await fetch(API(path)+'?ref='+C.branch,{headers:hd()}); const body={message:'update',content:enc(text),branch:C.branch};
-    if(m.ok)body.sha=(await m.json()).sha; const r=await fetch(API(path),{method:'PUT',headers:hd(),body:JSON.stringify(body)}); if(!r.ok){let g='';try{g=(await r.json()).message||''}catch(e){}throw{status:r.status,msg:g}}
+    for(let k=0;k<4;k++){
+      const m=await fetch(API(path)+'?ref='+C.branch+'&t='+Date.now(),{headers:hd(),cache:'no-store'});
+      const body={message:'update',content:enc(text),branch:C.branch};
+      if(m.ok)body.sha=(await m.json()).sha;
+      const r=await fetch(API(path),{method:'PUT',headers:hd(),body:JSON.stringify(body)});
+      if(r.ok)return;
+      let g='';try{g=(await r.json()).message||''}catch(e){}
+      if((r.status===409||r.status===422)&&k<3){await new Promise(z=>setTimeout(z,700*(k+1)));continue}
+      throw{status:r.status,msg:g};
+    }
   }
-  async function del(path){const m=await fetch(API(path)+'?ref='+C.branch,{headers:hd()});if(!m.ok)return;await fetch(API(path),{method:'DELETE',headers:hd(),body:JSON.stringify({message:'delete',sha:(await m.json()).sha,branch:C.branch})})}
+  async function del(path){const m=await fetch(API(path)+'?ref='+C.branch+'&t='+Date.now(),{headers:hd(),cache:'no-store'});if(!m.ok)return;await fetch(API(path),{method:'DELETE',headers:hd(),body:JSON.stringify({message:'delete',sha:(await m.json()).sha,branch:C.branch})})}
   function persist(){
     if(!GH){try{localStorage.setItem('ea_local_db',JSON.stringify(S))}catch(e){alert('حافظه دستگاه پر است.')}return}
     ver++;clearTimeout(st);st=setTimeout(flush,700);
