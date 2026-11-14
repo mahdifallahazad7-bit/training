@@ -425,19 +425,119 @@ function evalV(){
  const body=Object.keys(U).map(u=>{const L=U[u];return `<div class="card" style="margin-top:14px"><b>${esc((EV.unitNames||UNN)[u]||u)}</b><div class="mu" style="margin:4px 0 10px">${fa(L.length)} نفر</div>`+L.map(p=>{const codes=Object.keys(p.marks),dn=codes.filter(c=>p.marks[c]!==null),k=dn.filter(c=>p.marks[c]===1).length;return `<details class="p" style="display:block"><summary style="cursor:pointer;display:flex;justify-content:space-between;gap:8px"><span>${esc(p.name)}</span><span class="mu">${dn.length?fa(k)+' از '+fa(dn.length)+' مسلط':'ارزیابی نشده'}</span></summary><div style="margin-top:6px">${codes.map(c=>`<div style="font-size:13px;padding:3px 0">${p.marks[c]===1?'☑':p.marks[c]===0?'⮽':'—'} ${esc(T[c]||c)}${p.notes&&p.notes[c]?` <span class="mu">(${esc(p.notes[c])})</span>`:''}</div>`).join('')}</div></details>`}).join('')+'</div>'}).join('');
  return head('ارزیابی اولیه','لیست ارزیابی اولیه نیروها به تفکیک واحد')+`<div class="row" style="margin-bottom:14px"><button data-a="xev">خروجی اکسل ارزیابی اولیه</button></div>`+chart+body;
 }
-function evx(){
- const T=EV.titles||{},N=EV.unitNames||UNN,wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};
- EV.people.forEach(p=>{
-  const codes=Object.keys(p.marks),date=String(p.date||'').replace(/Date\s*:/,'').trim();
-  const aoa=[['ایستانوآوران نیرو','','','','FR-TR'],['لیست ارزیابی اولیه','','','',''],['نام: '+p.name,'','','واحد: '+(N[p.unit]||p.unit),'تاریخ: '+date],[],
-   ['ردیف','کد دوره','عناوین دوره های آموزشی و مهارت های مورد نیاز','ارزیابی (☑ مسلط / ⮽ نیاز به آموزش)','توضیحات'],
-   ...codes.map((c,i)=>[i+1,c,T[c]||c,p.marks[c]===1?'☑':p.marks[c]===0?'⮽':'',(p.notes&&p.notes[c])||''])];
-  const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:8},{wch:16},{wch:60},{wch:28},{wch:30}];
-  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:3}},{s:{r:1,c:0},e:{r:1,c:4}}];
-  XLSX.utils.book_append_sheet(wb,ws,p.name.slice(0,31).replace(/[:*?\/\\\[\]]/g,' '));
- });
- return wb;
+/* ===== خروجی اکسل با قالب فرم‌های شرکت (FR-TR) ===== */
+const TPL_CO='Ista Noavaran Niroo Co .',TPL_CHK='✔';
+const tplV=x=>x==null?'':x;
+const tplRw=(n,o)=>{const a=Array(n).fill('');Object.entries(o||{}).forEach(([k,v])=>{a[+k]=tplV(v)});return a};
+const tplMg=(r1,c1,r2,c2)=>({s:{r:r1,c:c1},e:{r:r2,c:c2}});
+const tplDate=()=>jd(Date.now());
+const tplDd=d=>String(d||'').replace(/Date\s*:/,'').trim();
+const tplCol=v=>2+(10-v);
+const tplHead=()=>{const a=tplRw(12,{0:'ردیف',1:'شرح'});for(let v=10;v>=1;v--)a[tplCol(v)]=v;return a};
+const tplSheet=(f)=>{const ws=XLSX.utils.aoa_to_sheet(f.out);ws['!cols']=f.cols.map(w=>({wch:w}));ws['!merges']=f.merges||[];return ws};
+const tplAdd=(wb,name,ws)=>{const base=String(name||'فرم').replace(/[:*?\/\\\[\]]/g,' ').slice(0,28).trim()||'فرم';let n=base,k=2;while(wb.SheetNames.includes(n))n=base+' '+(k++);XLSX.utils.book_append_sheet(wb,ws,n)};
+const tplBook=()=>{const wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};return wb};
+
+/* فرم درخواست / لیست دوره‌های مورد نیاز (FR-TR 12/00) */
+function tplReq(u){
+ const items=u.items||[],n=7,out=[],mer=[];
+ const add=r=>{out.push(r);return out.length-1};
+ add(tplRw(n,{0:TPL_CO,6:'FR-TR'})); mer.push(tplMg(0,0,0,5));
+ let r=add(tplRw(n,{0:'لیست دوره های آموزشی و مهارت‌های مورد نیاز'})); mer.push(tplMg(r,0,r,6));
+ add(tplRw(n,{0:'No :',2:'نام واحد: '+(u.name||''),5:'Date :',6:tplDate()}));
+ add(tplRw(n));
+ add(tplRw(n,{0:'ردیف',1:'کد دوره',2:'عناوین دوره های آموزشی و مهارت های مورد نیاز',3:'پیش نیاز',4:'طول دوره',5:'مدرس',6:'محل برگزاری'}));
+ for(let i=0;i<Math.max(30,items.length);i++){const it=items[i];add(tplRw(n,{0:i+1,1:it?it.c:'',2:it?it.t:''}))}
+ add(tplRw(n,{0:'IN-FR-TR-12/00'}));
+ return {out,cols:[8,18,60,26,14,22,24],merges:mer};
 }
+
+/* فرم ارزیابی اولیه (FR-TR 46/00) */
+function tplEv(p,N,T){
+ const codes=Object.keys(p.marks||{}),n=5,out=[],mer=[];
+ const add=r=>{out.push(r);return out.length-1};
+ add(tplRw(n,{0:TPL_CO,4:'FR-TR'})); mer.push(tplMg(0,0,0,3));
+ let r=add(tplRw(n,{0:'لیست ارزیابی اولیه'})); mer.push(tplMg(r,0,r,4));
+ add(tplRw(n,{0:'Name: '+p.name,2:'نام واحد: '+((N||{})[p.unit]||p.unit||''),4:'Date : '+tplDd(p.date)}));
+ add(tplRw(n));
+ add(tplRw(n,{0:'ردیف',1:'کد دوره',2:'عناوین دوره های آموزشی و مهارت های مورد نیاز',3:'ارزیابی (☑ مسلط / ⮽ نیاز به آموزش)',4:'توضیحات'}));
+ for(let i=0;i<Math.max(30,codes.length);i++){const c=codes[i];add(tplRw(n,{0:i+1,1:c||'',2:c?(T[c]||c):'',3:c?(p.marks[c]===1?'☑':p.marks[c]===0?'⮽':''):'',4:c?((p.notes&&p.notes[c])||''):''}))}
+ add(tplRw(n,{0:'IN-FR-TR-46/00'}));
+ return {out,cols:[8,16,60,30,30],merges:mer};
+}
+
+/* فرم شناسنامه آموزشی (FR-TR 45/00) */
+function tplPass(o){
+ const n=9,ty={'شغلی':5,'بهبود مدیریت':6,'عمومی':7},items=[...(o.rec||[]).map(i=>({t:i.t,d:i.d,s:i.s,y:i.y,k:i.k,e:i.e})),...[...(o.cs||[])].map(t=>({t,d:'',s:'',y:'',k:'',e:'واحد آموزش'}))],out=[],mer=[];
+ const add=r=>{out.push(r);return out.length-1};
+ add(tplRw(n,{0:TPL_CO,8:'FR-TR'})); mer.push(tplMg(0,0,0,7));
+ let r=add(tplRw(n,{0:'شناسنامه آموزشی'})); mer.push(tplMg(r,0,r,8));
+ add(tplRw(n,{0:'NO:',7:'Date :',8:tplDate()}));
+ add(tplRw(n,{0:'نام و نام خانوادگی:',1:o.n,3:'واحد خدمت:',4:(cat.find(x=>x.id===o.u)||{}).name||'',6:'مدرک تحصیلی:',7:o.edu||''}));
+ r=add(tplRw(n,{0:'آموزش های گذرانده شده'})); mer.push(tplMg(r,0,r,8));
+ const h1=add(tplRw(n,{0:'ردیف',1:'عنوان دوره آموزشی',2:'مدت',3:'نمره مکتسبه',4:'سال دوره',5:'نوع آموزشی',8:'مجری دوره'}));
+ const h2=add(tplRw(n,{5:'شغلی',6:'بهبود مدیریت',7:'عمومی'}));
+ mer.push(tplMg(h1,5,h1,7));
+ [0,1,2,3,4,8].forEach(c=>mer.push(tplMg(h1,c,h2,c)));
+ for(let i=0;i<Math.max(10,items.length);i++){const it=items[i]||{},row=tplRw(n,{0:i+1,1:it.t,2:it.d,3:it.s,4:it.y,8:it.e});if(ty[it.k])row[ty[it.k]]=TPL_CHK;add(row)}
+ add(tplRw(n,{8:'IN-FR-TR-45/00'}));
+ return {out,cols:[8,40,14,12,12,12,16,12,26],merges:mer};
+}
+
+/* فرم ارزیابی دوره توسط پرسنل (09/00) و توسط استاد (08/00) */
+function tplForm(o){
+ const n=12,out=[],mer=[];
+ const add=r=>{out.push(r);return out.length-1};
+ add(tplRw(n,{0:TPL_CO,11:'FR-TR'})); mer.push(tplMg(0,0,0,9));
+ let r=add(tplRw(n,{0:o.title})); mer.push(tplMg(r,0,r,11));
+ add(tplRw(n,{0:'No : کمیته آموزش(INTR)',10:'Date :',11:o.date}));
+ add(tplRw(n));
+ add(tplRw(n,{0:'اطلاعات دوره:'}));
+ add(tplRw(n,{0:'نام دوره:',2:o.ctitle,8:'کد دوره:',10:o.code}));
+ add(tplRw(n,{0:'نام مربی:',2:o.instructor,6:'داخل سازمان',7:o.org==='داخل سازمان'?TPL_CHK:'□',8:'خارج سازمان',9:o.org==='خارج سازمان'?TPL_CHK:'□'}));
+ add(tplRw(n,{0:'نام واحد:',2:o.unit}));
+ r=add(tplRw(n,{0:'لطفا نظرات خود را با هر یک از موارد زیر در ستون های مربوطه با علامت ✔ مشخص فرمائید در هر مورد امتیاز (10) به عنوان رضایت کامل و امتیاز (1) به عنوان عدم رضایت تلقی می شود.'})); mer.push(tplMg(r,0,r,11));
+ add(tplHead());
+ o.items.forEach((it,i)=>{const row=tplRw(n,{0:i+1,1:it.t}),v=+it.s;if(v>=1&&v<=10)row[tplCol(v)]=TPL_CHK;add(row)});
+ o.opens.forEach(it=>{const rr=add(tplRw(n,{0:it.n,1:it.t,2:it.a||''}));mer.push(tplMg(rr,2,rr,11))});
+ add(tplRw(n,{0:o.footL,2:o.person,8:'کارشناس کمیته آموزش:'}));
+ add(tplRw(n,{0:'تاریخ و امضاء :',8:'تاریخ و امضاء :'}));
+ add(tplRw(n,{0:o.footCode}));
+ return {out,cols:[8,50,6,6,6,6,6,6,6,6,6,6],merges:mer};
+}
+const tplSurv=r=>{const cc=courses[r.course]||{};return tplForm({title:'فرم ارزیابی دوره آموزشی توسط پرسنل',ctitle:r.ctitle||cnm(r.course),code:cc.code||r.ccode||'',instructor:cc.instructor||'',org:'',unit:slab(r),date:jd(r.at),items:Q.map((t,i)=>({t,s:(r.scores||[])[i]})),opens:[{n:14,t:'پیشنهادات و انتقادات شما برای بهبود کیفیت دوره های آموزشی آتی چیست؟'},{n:15,t:'آیا موضوع دیگری مد نظر شما بوده است که در سوالات گنجانده نشده است ، در صورت نیاز توضیح دهید.'}],person:r.person||'',footL:'نام و نام خانوادگی پرسنل:',footCode:'IN-FR-TR-09/00'})};
+const tplInst=x=>tplForm({title:'فرم ارزیابی دوره آموزشی توسط استاد',ctitle:x.ctitle||'',code:x.code||'',instructor:x.instructor||'',org:x.org||'',unit:(cat.find(u=>u.id===x.unit)||{}).name||'',date:x.date||'',items:IEQ.map((t,i)=>({t,s:(x.scores||[])[i]})),opens:IET.map((t,i)=>({n:13+i,t,a:[x.strengths,x.needs,x.suggest][i]||''})),person:x.instructor||'',footL:'مدرس دوره:',footCode:'IN-FR-TR-08/00'});
+
+/* فرم حضور و غیاب و اثربخشی دوره (یک شیت برای هر گروه) */
+function tplAtt(cid,c,k){
+ const g=c.groups[k]||{},ss2=sess(c),S=ss2.length,n=2+S+10+1,out=[],mer=[];
+ const add=r=>{out.push(r);return out.length-1};
+ add(tplRw(n,{0:TPL_CO,[n-1]:'FR-TR'})); mer.push(tplMg(0,0,0,n-2));
+ let r=add(tplRw(n,{0:'حضور و غیاب و اثربخشی دوره های آموزشی'})); mer.push(tplMg(r,0,r,n-1));
+ add(tplRw(n,{0:'No:',[n-2]:'Date:',[n-1]:tplDate()}));
+ add(tplRw(n,{0:'نام دوره آموزشی:',2:c.title,[n-4]:'کد دوره:',[n-2]:[c.code,...(c.codes||[])].filter(Boolean).join('، ')}));
+ add(tplRw(n,{0:'محل برگزاری دوره:',[n-4]:'تاریخ برگزاری دوره:',[n-2]:ss2.join('، ')}));
+ add(tplRw(n,{0:'مدت ساعت دوره:',[n-4]:'مدرس دوره:',[n-2]:c.instructor||''}));
+ add(tplRw(n,{0:'مباحث و اهداف دوره:'}));
+ r=add(tplRw(n,{0:'ملاحظات: لطفاً نظرات خود را در رابطه با هریک از موارد زیر در ستونهای مربوطه با علامت ✔ مشخص فرمائید در هر مورد امتیاز (10) به عنوان رضایت کامل و امتیاز (1) به عنوان عدم رضایت تلقی می شود.'})); mer.push(tplMg(r,0,r,n-1));
+ const h1=add(tplRw(n,{0:'ردیف',1:'نام و نام خانوادگی',2:'جلسات',[2+S]:'ارزشیابی توسط مدرس',[n-1]:'تعداد حضور'}));
+ const h2row=tplRw(n);add(h2row);const h2=out.length-1;
+ ss2.forEach((d,i)=>{h2row[2+i]='جلسه '+(i+1)+' - '+d});
+ for(let v=10;v>=1;v--)h2row[2+S+(10-v)]=v;
+ mer.push(tplMg(h1,2,h1,1+S)); mer.push(tplMg(h1,2+S,h1,2+S+9));
+ [0,1,n-1].forEach(c2=>mer.push(tplMg(h1,c2,h2,c2)));
+ (g.members||[]).forEach((nm,j)=>{const row=tplRw(n,{0:j+1,1:nm});let cnt=0;ss2.forEach((_,i)=>{const x=att[cid+'_'+k+'_'+(i+1)];if(x){const ok=!!x.marks[j];row[2+i]=ok?'✔':'✘';if(ok)cnt++}});row[n-1]=cnt;add(row)});
+ return {out,cols:[7,28,...Array(S).fill(14),...Array(10).fill(4),10],merges:mer};
+}
+
+/* کتاب‌سازها */
+const tplBookReq=U=>{const wb=tplBook();U.forEach(u=>{const f=tplReq(u);tplAdd(wb,u.name||'بدون واحد',tplSheet(f))});return wb};
+const tplBookPass=L=>{const wb=tplBook();L.forEach(o=>{const f=tplPass(o);tplAdd(wb,o.n,tplSheet(f))});return wb};
+const tplBookEval=()=>{const wb=tplBook(),T=EV.titles||{},N=EV.unitNames||UNN;EV.people.forEach(p=>{const f=tplEv(p,N,T);tplAdd(wb,p.name,tplSheet(f))});return wb};
+const tplBookInst=(L,sum)=>{const wb=sum===false?tplBook():mkx([ievSum(L)]);L.forEach(x=>{const f=tplInst(x);tplAdd(wb,(x.ctitle||'ارزیابی')+' - '+(x.date||''),tplSheet(f))});return wb};
+const tplBookSurv=()=>{const q=Q,labs=[...new Set(sv.map(slab))],av=a2=>a2.length?+(a2.reduce((x,y)=>x+y,0)/a2.length).toFixed(2):'';const wb=mkx([['خلاصه',['سؤال','میانگین کل',...labs],q.map((t,i)=>[t,av(sv.map(r=>r.scores[i]).filter(Boolean)),...labs.map(l=>av(sv.filter(r=>slab(r)===l).map(r=>r.scores[i]).filter(Boolean)))])]]);sv.forEach(r=>{const f=tplSurv(r);tplAdd(wb,(r.person||'پرسشنامه')+' - '+(r.ctitle||cnm(r.course)),tplSheet(f))});return wb};
+const tplBookAtt=cid0=>{const c=courses[cid0]||C(),wb=tplBook();Object.keys(c.groups||{}).forEach(k=>{const f=tplAtt(cid0,c,k);tplAdd(wb,(c.groups[k]||{}).name||k,tplSheet(f))});return wb};
+
 function render(f){render0(f);layPost()}
 
 const ICO=(v,s)=>{const e=document.querySelector('.side [data-v="'+v+'"] svg');return e?e.outerHTML.replace('class="ic"','style="width:'+s+'px;height:'+s+'px"'):''};
@@ -488,13 +588,14 @@ if(!val('f_t')||!Object.keys(groups).length){msg='نام دوره و حداقل 
 else if(a==='addr'){const o=roster()[+b.dataset.k],g=i=>(document.getElementById(i+o.k)||{value:''}).value.trim();if(!g('rt'))msg='عنوان دوره را وارد کنید.';else{const item={t:g('rt'),d:g('rd'),s:g('rs'),y:g('ry'),k:g('rk'),e:g('re')};if(o.id)await savePerson(o.id,{items:[...o.rec,item]});else await db.collection('people').add({name:o.n,unit:'',edu:'',items:[item],order:Date.now()});opn.add(o.n);msg='به شناسنامه اضافه شد.'}}
 else if(a==='rdel'){const id=b.dataset.id,i=+b.dataset.i,key='rdel'+id+i;if(pend===key){const p=people.find(x=>x.id===id);await savePerson(id,{items:(p.items||[]).filter((_,j)=>j!==i)});pend=''}else pend=key}
 else if(a==='mdel'){const i=+b.dataset.i,key='mdel'+cid+sg+i;if(pend===key){const c=courses[cid],g=c.groups[sg];await db.doc('courses/'+cid).set({...c,groups:{...c.groups,[sg]:{...g,members:g.members.filter((_,j)=>j!==i)}}});for(const [k,a2] of Object.entries(att))if(a2.course===cid&&a2.group===sg)await db.doc('attendance/'+k).set({...a2,marks:a2.marks.filter((_,j)=>j!==i)});marks=null;pend=''}else pend=key}
-else if(a==='xu'){const L=roster().filter(o=>!o.left&&(pv?o.u===pv:!cat.some(x=>x.id===o.u))),nm=(cat.find(x=>x.id===pv)||{}).name||'بدون واحد';await xout(mkb([[nm,rows(L)]]),'شناسنامه آموزشی - '+nm)}
-else if(a==='xa'){const R=roster().filter(o=>!o.left),sh=[...cat.map(x=>[x.name,R.filter(o=>o.u===x.id)]),['بدون واحد',R.filter(o=>!cat.some(x=>x.id===o.u))]].filter(x=>x[1].length).map(x=>[x[0],rows(x[1])]);await xout(mkb(sh),'شناسنامه آموزشی - همه واحدها')}
-else if(a==='xp'){const o=roster()[+b.dataset.k];await xout(mkb([[o.n,rows([o])]]),'شناسنامه آموزشی - '+o.n)}
-else if(a==='xcu'){const u=cat.find(x=>x.id===cu)||cat[0];await xout(mkx([[u.name,['کد','عنوان دوره','وضعیت'],u.items.map(i=>[i.c,i.t,doneI(i,u.id)?'برگزار شد':'در انتظار'])]]),'دوره‌های مورد نیاز - '+u.name)}
-else if(a==='xev'){await xout(evx(),'ارزیابی اولیه نیروها')}else if(a==='xca'){await xout(mkx(cat.map(u=>[u.name,['کد','عنوان دوره','وضعیت'],u.items.map(i=>[i.c,i.t,doneI(i,u.id)?'برگزار شد':'در انتظار'])])),'دوره‌های مورد نیاز - همه واحدها')}
-else if(a==='xat'){const c=C(),ss2=sess(c);await xout(mkx(Object.keys(c.groups).map(k=>{const g=c.groups[k];return [g.name,['ردیف','نام و نام خانوادگی',...ss2.map((d,i)=>'جلسه '+(i+1)+' - '+d),'تعداد حضور'],g.members.map((n,i)=>{const ms=ss2.map((_,j)=>{const x=att[cid+'_'+k+'_'+(j+1)];return x?(x.marks[i]?'✔':'✘'):''});return [i+1,n,...ms,ms.filter(v=>v==='✔').length]})]})),'حضور و غیاب - '+c.title)}
-else if(a==='xsv'){const q=Q,labs=[...new Set(sv.map(slab))],av=a2=>a2.length?+(a2.reduce((x,y)=>x+y,0)/a2.length).toFixed(2):'';await xout(mkx([['خلاصه',['سؤال','میانگین کل',...labs],q.map((t,i)=>[t,av(sv.map(r=>r.scores[i]).filter(Boolean)),...labs.map(l=>av(sv.filter(r=>slab(r)===l).map(r=>r.scores[i]).filter(Boolean)))])],['پاسخ‌ها',['دوره','واحد','نام',...q.map((_,i)=>'سؤال '+(i+1)),'میانگین'],sv.map(r=>[r.ctitle||cnm(r.course),slab(r),r.person||'',...r.scores,av(r.scores)])]]),'نتایج نظرسنجی')}
+else if(a==='xu'){const L=roster().filter(o=>!o.left&&(pv?o.u===pv:!cat.some(x=>x.id===o.u))),nm=(cat.find(x=>x.id===pv)||{}).name||'بدون واحد';await xout(tplBookPass(L),'شناسنامه آموزشی - '+nm)}
+else if(a==='xa'){const R=roster().filter(o=>!o.left),sh=[...cat.map(x=>[x.name,R.filter(o=>o.u===x.id)]),['بدون واحد',R.filter(o=>!cat.some(x=>x.id===o.u))]].filter(x=>x[1].length).map(x=>[x[0],rows(x[1])]);await xout(tplBookPass(R),'شناسنامه آموزشی - همه واحدها')}
+else if(a==='xp'){const o=roster()[+b.dataset.k];await xout(tplBookPass([o]),'شناسنامه آموزشی - '+o.n)}
+else if(a==='xcu'){const u=cat.find(x=>x.id===cu)||cat[0];await xout(tplBookReq([u]),'دوره‌های مورد نیاز - '+u.name)}
+else if(a==='xev'){await xout(tplBookEval(),'ارزیابی اولیه نیروها')}
+else if(a==='xca'){await xout(tplBookReq(cat),'دوره‌های مورد نیاز - همه واحدها')}
+else if(a==='xat'){const c=C();await xout(tplBookAtt(cid),'حضور و غیاب - '+c.title)}
+else if(a==='xsv'){await xout(tplBookSurv(),'نتایج نظرسنجی')}
 else if(a==='upg'||a==='upr'){const g=a==='upg',fi=document.getElementById(g?'g_f':'r_f'),fs=[...(fi&&fi.files||[])],cs=(document.getElementById(g?'g_c':'r_c')||{}).value||'',cap=val(g?'g_t':'r_t'),note=val('r_n'),link=val('r_l');
 if(!g&&!cap)msg='عنوان را وارد کنید.';else if(g&&!fs.length)msg='ابتدا عکس‌ها را انتخاب کنید.';else if(!g&&!fs.length&&!link)msg='فایل یا لینک را وارد کنید.';
 else{const as=await claude.use('assets');if(fs.length&&!as)msg='دسترسی بارگذاری فایل ندارید.';else{msg='در حال بارگذاری…';render(true);let n=0;try{for(const f of(fs.length?fs:[null])){let id='',ty='';if(f){const r=await as.upload(f);id=r.id;ty=f.type||r.contentType||''}
@@ -510,8 +611,8 @@ else if(a==='imerge'){const n=await __inbox.merge();msg=fa(n)+' مورد جدی�
 else if(a==='pathu')pathU=b.dataset.v;
 else if(a==='ia')ivA[+b.dataset.i]=+b.dataset.v;
 else if(a==='ievs'){const g=i=>(document.getElementById(i)||{value:''}).value.trim(),c=courses[ivC];if(!c)msg='ابتدا دوره را انتخاب کنید.';else if(ivA.some(v=>!v))msg='به هر ۱۲ مورد امتیاز بدهید.';else{await db.collection('ievals').add({course:ivC,ctitle:c.title,code:[c.code,...(c.codes||[])].filter(Boolean).join('، '),instructor:g('iv_m')||c.instructor||'',org:g('iv_o'),unit:g('iv_u'),date:g('iv_d'),no:Object.keys(ievs).length+1,scores:ivA.slice(),strengths:g('iv_13'),needs:g('iv_14'),suggest:g('iv_15'),at:Date.now()});['iv_13','iv_14','iv_15'].forEach(i=>{const e=document.getElementById(i);if(e)e.value=''});ivA=Array(12).fill(0);msg='ارزیابی استاد ثبت شد.'}}
-else if(a==='xiev'){const L=Object.entries(ievs).map(([id,x])=>({...x,id})).filter(x=>!ivF||x.course===ivF).sort((x,y)=>(x.at||0)-(y.at||0));if(!L.length)msg='ارزیابی‌ای برای خروجی نیست.';else await xout(mkx([ievSum(L),...L.map(ievForm)]),'ارزیابی استاد - '+(ivF?(courses[ivF]||{}).title:'همه دوره‌ها'))}
-else if(a==='xiev1'){const x=ievs[b.dataset.id];if(x)await xout(mkx([ievForm(x,0)]),'ارزیابی استاد - '+(x.ctitle||'')+' - '+(x.date||''))}
+else if(a==='xiev'){const L=Object.entries(ievs).map(([id,x])=>({...x,id})).filter(x=>!ivF||x.course===ivF).sort((x,y)=>(x.at||0)-(y.at||0));if(!L.length)msg='ارزیابی‌ای برای خروجی نیست.';else await xout(tplBookInst(L),'ارزیابی استاد - '+(ivF?(courses[ivF]||{}).title:'همه دوره‌ها'))}
+else if(a==='xiev1'){const x=ievs[b.dataset.id];if(x)await xout(tplBookInst([x],false),'ارزیابی استاد - '+(x.ctitle||'')+' - '+(x.date||''))}
 else if(a==='simg'){const k=b.dataset.k,f=((document.getElementById('si_'+k)||{}).files||[])[0];if(!f)msg='ابتدا تصویر را انتخاب کنید.';else{msg='در حال بارگذاری…';render(true);try{const as=await claude.use('assets'),r=await as.upload(f),old=(siteC[k]||{}).id;await saveSite(k,{id:r.id});if(old){try{await as.delete(old)}catch(e){}}msg='تصویر جایگزین شد.'}catch(x){msg=x&&x.code==='too_large'?'حجم تصویر زیاد است؛ تصویر کوچک‌تری انتخاب کنید.':'بارگذاری انجام نشد؛ اتصال یا دسترسی مدیر را بررسی کنید.'}}}
 else if(a==='ssz'){const k=b.dataset.k,g=i=>+((document.getElementById(i+k)||{}).value)||0;await saveSite(k,{w:g('sw_'),h:g('sh_'),u:(document.getElementById('su_'+k)||{value:'px'}).value});msg='اندازه ذخیره شد.'}
 else if(a==='srst'){const k=b.dataset.k,old=(siteC[k]||{}).id;await saveSite(k,{id:'',w:0,h:0,u:'px'});if(old){try{(await claude.use('assets')).delete(old)}catch(e){}}msg='به تصویر پیش‌فرض برگشت.'}
