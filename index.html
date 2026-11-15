@@ -440,14 +440,15 @@ const UNN={we:'جوشکاری',ir:'شمش کشی',ed:'مهندسی الکتری�
 let evs={},evU='';const evOpen=new Set();
 window.__evt=d=>{d.open?evOpen.add(d.dataset.pk):evOpen.delete(d.dataset.pk)};
 try{Object.values(siteC).forEach(c=>c&&c.id&&blobUrl(c.id))}catch(e){}
+const evMt=(a,b)=>!!a&&!!b&&(a===b||(Math.min(a.length,b.length)>=6&&(a.includes(b)||b.includes(a))));
 const evNu=x=>String(x||'').replace(/[\u200c\s]+/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/^واحد/,'');
-const evUnits=()=>{const U=cat.map(u=>({id:u.id,name:u.name}));((window.EV&&EV.units)||[]).forEach(e=>{if(!U.some(u=>evNu(u.name)===evNu(e.name)))U.push({id:'ev:'+evNu(e.name),name:e.name})});return U};
+const evUnits=()=>{const U=cat.map(u=>({id:u.id,name:u.name}));((window.EV&&EV.units)||[]).forEach(e=>{if(!U.some(u=>evMt(evNu(u.name),evNu(e.name))))U.push({id:'ev:'+evNu(e.name),name:e.name})});return U};
 const evUn=uid=>evNu((evUnits().find(x=>x.id===uid)||{}).name);
-const evQs=uid=>{const u=cat.find(x=>x.id===uid);let q=((u&&u.items)||[]).map(i=>({c:i.c,t:i.t}));if(!q.length&&window.EV){const eu=(EV.units||[]).find(x=>evNu(x.name)===evUn(uid));if(eu)q=eu.courses.map(c=>({c:c.c,t:c.t}))}return q};
+const evQs=uid=>{const u=cat.find(x=>x.id===uid);let q=((u&&u.items)||[]).map(i=>({c:i.c,t:i.t}));if(!q.length&&window.EV){const eu=(EV.units||[]).find(x=>evMt(evNu(x.name),evUn(uid)));if(eu)q=eu.courses.map(c=>({c:c.c,t:c.t}))}return q};
 const evPU=p=>evNu((EV.unitNames||UNN)[p.unit]||p.unit);
-const evStat=(uid,name)=>((window.EV&&EV.people)||[]).find(p=>evPU(p)===evUn(uid)&&same(p.name,name))||null;
+const evStat=(uid,name)=>((window.EV&&EV.people)||[]).find(p=>evMt(evPU(p),evUn(uid))&&same(p.name,name))||null;
 function evList(uid){const B=roster().filter(o=>!o.left&&o.u===uid).map(o=>({pk:o.id||'n_'+o.n,name:o.n}));
- ((window.EV&&EV.people)||[]).forEach(p=>{if(evPU(p)===evUn(uid)&&!B.some(x=>same(x.name,p.name)))B.push({pk:'n_'+p.name,name:p.name})});
+ ((window.EV&&EV.people)||[]).forEach(p=>{if(evMt(evPU(p),evUn(uid))&&!B.some(x=>same(x.name,p.name)))B.push({pk:'n_'+p.name,name:p.name})});
  const Q=evQs(uid);return B.map(x=>{const st=evStat(uid,x.name),r=evs[x.pk]||st||{},m={};Q.forEach(q=>m[q.c]=r.marks&&r.marks[q.c]!=null?r.marks[q.c]:null);return{...x,unit:uid,marks:m,notes:r.notes||{},date:r.date||'',locked:evs[x.pk]?evs[x.pk].done===true:!!st}})}
 function evalV(){
  if(!admin)return head('ارزیابی اولیه','فقط مدیر به این بخش دسترسی دارد.');
@@ -629,7 +630,7 @@ let pathU='';
 function tilesHome(){const ev=window.EV&&EV.people?EV.people.length:0;
 const T=[['courses','دوره‌ها',fa(cl().length)+' دوره ثبت‌شده'],['catalog','دوره‌های مورد نیاز',fa(cat.length)+' واحد'],['att','حضور و غیاب',fa(Object.keys(att).length)+' جلسه ثبت‌شده'],['survey','نظرسنجی',fa(sv.length)+' فرم ثبت‌شده'],['req','درخواست دوره',fa(Object.keys(reqs).length)+' درخواست'],['people','شناسنامه آموزشی',fa(people.filter(p=>!p.left).length)+' نفر'],['staff','مدیریت پرسنل',fa(people.filter(p=>p.left).length)+' نفر خارج‌شده'],['ev','ارزیابی اولیه',ev?fa(ev)+' نفر':'ارزیابی پرسنل'],['gallery','گالری عکس',fa(photos.length)+' عکس'],['res','جزوه و فیلم',fa(lib.length)+' مورد'],['lib','کتابخانه','کتابخانه فنی']];
 const newR=Object.values(reqs).filter(x=>(x.status||'new')==='new').length;
-return `<div style="margin-bottom:6px"><div class="mu">ایستان‌آوران نیرو</div><h1 style="margin:2px 0 8px">${admin?'سلام مهدی جان':'سلام'}</h1><div style="display:flex;gap:8px;flex-wrap:wrap">${chip(fa(cl().length)+' دوره ثبت‌شده',okc)}${newR?chip(fa(newR)+' درخواست جدید',plc):''}</div></div><div class="tiles">${T.map((t,i)=>`<a class="tile t${i%4}" href="#${t[0]}">${ICO(t[0],26)}<div><b>${t[1]}</b><small>${t[2]}</small></div></a>`).join('')}</div>${reqAlert()}${upcomingHTML()}`}
+return `<div style="margin-bottom:6px"><div class="mu">ایستانوآوران نیرو</div><h1 style="margin:2px 0 8px">${admin?'سلام مهدی جان':'سلام'}</h1><div style="display:flex;gap:8px;flex-wrap:wrap">${chip(fa(cl().length)+' دوره ثبت‌شده',okc)}${newR?chip(fa(newR)+' درخواست جدید',plc):''}</div></div><div class="tiles">${T.map((t,i)=>`<a class="tile t${i%4}" href="#${t[0]}">${ICO(t[0],26)}<div><b>${t[1]}</b><small>${t[2]}</small></div></a>`).join('')}</div>${reqAlert()}${upcomingHTML()}`}
 function pathHome(){const us=cat.filter(u=>(u.items||[]).length||people.some(p=>p.unit===u.id&&!p.left));if(!us.some(u=>u.id===pathU))pathU=(us.find(u=>u.id==='qc')||us[0]||{id:''}).id;
 const u=cat.find(x=>x.id===pathU)||{id:'',items:[],name:''},items=u.items||[],dn=items.filter(i=>doneI(i,u.id)),td=items.filter(i=>!doneI(i,u.id));
 const pl=Object.entries(courses).filter(([k,c])=>!held(k)&&courseUnits(c).has(u.id)),rq=Object.values(reqs).filter(x=>x.unit===u.id&&(x.status||'new')!=='plan'&&x.status!=='no');
