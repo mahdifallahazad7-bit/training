@@ -146,12 +146,12 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
   }
   async function flush(){
     if(saving){st=setTimeout(flush,700);return} saving=true; const v=ver;
-    try{await put('data.json',JSON.stringify(S));saved=v}catch(e){const s=e&&e.status,h=s===401?'توکن نامعتبر یا منقضی شده است؛ از «قفل کردن» خارج و دوباره وارد شوید یا توکن جدید بسازید.':(s===403||s===404)?'توکن اجازه نوشتن در repo «'+C.repo+'» را ندارد. توکن باید برای همین repo دسترسی Contents: Read and write داشته باشد.':(s===409||s===422)?'تداخل در ذخیره یا نام شاخه (branch) اشتباه است؛ صفحه را دوباره باز کنید و تغییر را تکرار کنید.':'اتصال به گیت‌هاب برقرار نشد؛ اینترنت را بررسی کنید.';alert('ذخیره در گیت‌هاب انجام نشد.\n'+h+'\n(کد: '+(s||'شبکه')+(e&&e.msg?' - '+e.msg:'')+')')}
+    try{if(!loadedOK)throw 0;try{const R=JSON.parse((await getText('data.json'))||'{}').devices||{};S.devices=S.devices||{};Object.keys(R).forEach(k=>{if(!S.devices[k]&&!delDev.has(k))S.devices[k]=R[k]})}catch(e){}await put('data.json',JSON.stringify(S));saved=v}catch(e){const s=e&&e.status,h=s===401?'توکن نامعتبر یا منقضی شده است؛ از «قفل کردن» خارج و دوباره وارد شوید یا توکن جدید بسازید.':(s===403||s===404)?'توکن اجازه نوشتن در repo «'+C.repo+'» را ندارد. توکن باید برای همین repo دسترسی Contents: Read and write داشته باشد.':(s===409||s===422)?'تداخل در ذخیره یا نام شاخه (branch) اشتباه است؛ صفحه را دوباره باز کنید و تغییر را تکرار کنید.':'اتصال به گیت‌هاب برقرار نشد؛ اینترنت را بررسی کنید.';alert('ذخیره در گیت‌هاب انجام نشد.\n'+h+'\n(کد: '+(s||'شبکه')+(e&&e.msg?' - '+e.msg:'')+')')}
     saving=false; if(saved<ver&&saved===v)flush();
   }
   async function load(){
     if(ver>saved)return;
-    try{const t=await getText('data.json');const n=JSON.parse(t||'{}');window.__dataReady=true;if(JSON.stringify(n)!==JSON.stringify(S)){S=n;fireAll()}if(admin&&S.devices&&Object.keys(S.devices).length&&!(S.devices[devId]&&S.devices[devId].approved)){try{localStorage.removeItem('ea_gh_token')}catch(e){}location.reload()}}catch(e){}
+    try{const t=await getText('data.json');const n=JSON.parse(t||'{}');window.__dataReady=true;loadedOK=true;const dv0=JSON.stringify(S.devices||{});if(JSON.stringify(n)!==JSON.stringify(S)){S=n;fireAll();if(JSON.stringify(S.devices||{})!==dv0)refresh()}if(admin&&S.devices&&Object.keys(S.devices).length&&!(S.devices[devId]&&S.devices[devId].approved)){try{localStorage.removeItem('ea_gh_token')}catch(e){}location.reload()}}catch(e){}
   }
   const OB=t=>btoa(t).split('').reverse().join(''), UB=t=>atob(t.split('').reverse().join(''));
   const IB=()=>{const i=S._inbox;return i&&i.r&&i.t?{o:i.o||C.owner,r:i.r,t:UB(i.t)}:null};
@@ -194,6 +194,7 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
   };
   const downloads={async save({filename,data}){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data]));a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}};
 
+  let loadedOK=false;const delDev=new Set();
   const devId=(()=>{try{let d=localStorage.getItem('ea_dev');if(!d){d=rid();localStorage.setItem('ea_dev',d)}return d}catch(e){return rid()}})();
   async function checkDevice(){const D=S.devices=S.devices||{},ids=Object.keys(D),me=D[devId];
    if(me&&me.approved)return true;
@@ -207,7 +208,7 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
     if(!GH){try{S=JSON.parse(localStorage.getItem('ea_local_db')||'{}')}catch(e){}return}
     let neterr=false;
     if(token){try{const r=await fT('https://api.github.com/repos/'+C.owner+'/'+C.repo,{headers:hd()});const j=r.ok?await r.json():{};admin=r.ok&&!!j.permissions?.push;if(j.default_branch)C.branch=j.default_branch}catch(e){admin=false;neterr=true}if(!admin)token=''}
-    if(admin&&token){try{await load();admin=await checkDevice()}catch(e){}}
+    if(admin&&token){try{await load();admin=loadedOK?await checkDevice():false}catch(e){admin=false}}
     btn=document.createElement('button');btn.id='lockbtn';
     btn.className='nav';btn.style.cssText='border:0;background:transparent;text-align:start;min-height:0;font-weight:400;cursor:pointer';btn.innerHTML='<span>🔐</span><span class="t"></span>';
     btn.querySelector('.t').textContent=' '+(admin?'قفل کردن (خروج مدیر)':(neterr?'ورود مدیر (بدون اتصال)':'ورود مدیر'));
@@ -240,7 +241,7 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
     if(!j){try{const r=await fetch((C.proxy||'')+'evals.json?t='+Date.now());if(r.ok)j=await r.json()}catch(e){}}
     window.EV=j;refresh()}).catch(()=>{});
   window.__inbox={merged:id=>!!(S._merged&&S._merged[id]),get:()=>S._inbox||null,set:(o,r,t)=>{need();S._inbox={o,r,t:OB(t)};persist()},ok:()=>!!IB(),merge:mergeInbox,test:async()=>{try{await inboxPut('test','t'+Date.now(),{ok:1});return 'ok'}catch(e){return String(e&&e.message||e)}}};
-  window.__dev={id:devId,all:()=>S.devices||{},owner:()=>admin&&!!(S.devices&&S.devices[devId]&&S.devices[devId].owner),set:(id,p)=>{need();S.devices=S.devices||{};S.devices[id]={...(S.devices[id]||{}),...p};persist()},del:id=>{need();if(S.devices){delete S.devices[id];persist()}}};
+  window.__dev={id:devId,all:()=>S.devices||{},owner:()=>admin&&!!(S.devices&&S.devices[devId]&&S.devices[devId].owner),set:(id,p)=>{need();S.devices=S.devices||{};S.devices[id]={...(S.devices[id]||{}),...p};persist()},del:id=>{need();delDev.add(id);if(S.devices){delete S.devices[id];persist()}}};
   window.claude={async use(n){
     await window.__authReady;
     if(n==='db')return db; if(n==='assets')return assets; if(n==='downloads')return downloads;
@@ -394,7 +395,7 @@ function upcomingHTML(){
  if(!items.length)return `<div class="card" style="margin-bottom:14px">${head}<div class="mu" style="margin-top:6px">جلسه‌ی آینده‌ای ثبت نشده. دوره رو با تاریخ جلساتش ثبت کن تا اینجا بیاد.</div></div>`;
  return `<div class="card" style="margin-bottom:14px">${head}${items.slice(0,8).map(([d,t,i])=>`<div class="p" style="font-size:13px"><div>${esc(t)} <span class="mu">· جلسه ${fa(i)}</span></div><div class="mu" style="white-space:nowrap">${d==='9999/99/99'?'تاریخ مشخص نشده':fa(d)}</div></div>`).join('')}</div>`;
 }
-function dash(){return '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px">'+clockW()+logoBanner()+'</div>'+imgLink()+reqAlert()+upcomingHTML()+dsBox()+unitOrbit()}
+function dash(){return '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px">'+clockW()+logoBanner()+'</div>'+imgLink()+reqAlert()+devAlert()+upcomingHTML()+dsBox()+unitOrbit()}
 const cnt=k=>{const L=Object.values(att).filter(a=>a.course===k);if(!L.length)return '';const ls=Math.max(...L.map(a=>a.session||0)),m=L.filter(a=>(a.session||0)===ls).flatMap(a=>a.marks||[]),pr=m.filter(x=>x).length;return `<div class="mu">جلسه ${fa(ls)}: ${fa(pr)} حاضر · ${fa(m.length-pr)} غایب</div>`};
 function dash0(){const all=sv.flatMap(s=>s.scores||[]),m=Object.values(att).flatMap(a=>a.marks||[]),pr=m.filter(x=>x).length,agg={};
 sv.forEach(s=>{const c=courses[s.course],lb=(cat.find(x=>x.id===s.group)||{}).name||(c?(sgs(c)[s.group]||s.group):s.group);(agg[lb]=agg[lb]||[]).push(...(s.scores||[]))});
@@ -580,9 +581,10 @@ function perPage(r,i){const co=courses[r.course]||{},c={A8:'نام دوره: '+(
  (r.scores||[]).forEach((s,k)=>{if(s>=1&&s<=10)c[colS(s)+(13+k)]='✔'});if(r.c1)c.B26=SVT[0]+'\n'+r.c1;if(r.c2)c.B27=SVT[1]+'\n'+r.c2;return{n:(r.person||'پاسخ')+' '+(i+1),c}}
 const uniq=(L,f)=>{const m={};L.forEach(o=>(m[f(o)]=m[f(o)]||[]).push(o));return Object.entries(m)};
 async function xnew(a,b){
- const ok=['dvap','dvrm','impc','evdone','evedit','evu','evm','evx','stab','pedu','ctab','cgal','cedit','uedit','udel','prest','pdel','uadd','xu','xa','xp','xcu','xca','xheld','xiev','xiev1','xev','xevp','xsvf'];if(!ok.includes(a))return false;
+ const ok=['devgo','dvap','dvrm','impc','evdone','evedit','evu','evm','evx','stab','pedu','ctab','cgal','cedit','uedit','udel','prest','pdel','uadd','xu','xa','xp','xcu','xca','xheld','xiev','xiev1','xev','xevp','xsvf'];if(!ok.includes(a))return false;
  try{
   if(a==='ctab'){ctab=b.dataset.v}
+  else if(a==='devgo'){location.hash='#staff';setTimeout(()=>{stab='dev';render(true)},120)}
   else if(a==='dvap'){__dev.set(b.dataset.id,{approved:true});msg='دستگاه تأیید شد.'}
   else if(a==='dvrm'){__dev.del(b.dataset.id);msg='دسترسی دستگاه حذف شد.'}
   else if(a==='impc'){const P=chartPlan();if(pend!=='impc'){pend='impc';msg='آماده ورود: '+fa(P.newU.length)+' واحد جدید، '+fa(P.newP.length)+' نفر جدید، '+fa(P.upd.length)+' نفر موجود (به‌روزرسانی واحد، کد و سمت). برای اجرا دوباره دکمه را بزنید.'}else{pend='';await runChart(P);msg='✓ ورود چارت انجام شد: '+fa(P.newU.length)+' واحد جدید، '+fa(P.newP.length)+' نفر جدید، '+fa(P.upd.length)+' نفر به‌روز شد.'}}
@@ -639,6 +641,8 @@ const trashV=()=>admin&&trash.length?`<details class="card" style="margin-bottom
 const SVT=['پیشنهادات و انتقادات شما برای بهبود کیفیت دوره‌های آموزشی آتی چیست؟','آیا موضوع دیگری مد نظر شما بوده است که در سوالات گنجانده نشده است، در صورت نیاز توضیح دهید.'];
 const devV=()=>{if(!(window.__dev&&__dev.owner()))return'';const D=Object.entries(__dev.all()).sort((a,b)=>(b[1].owner?1:0)-(a[1].owner?1:0)||(a[1].at||0)-(b[1].at||0));
  return `<div class="card" style="margin-bottom:14px"><b>🔐 دستگاه‌ها و دسترسی مدیر</b><div class="mu" style="margin:6px 0 10px">هر دستگاه (گوشی یا کامپیوتر) که با توکن مدیر وارد شود، اول باید اینجا تأیید شود؛ دستگاه تأییدنشده فقط بیننده است. با «حذف دسترسی»، همان دستگاه ظرف حدود یک دقیقه از حالت مدیر خارج می‌شود.</div>${D.map(([id,d])=>`<div style="border-top:1px solid var(--bd);padding:10px 0;display:flex;justify-content:space-between;align-items:center;gap:8px"><span><b>${esc(d.name||'نامشخص')}</b>${id===__dev.id?' <span class="mu">(همین دستگاه)</span>':''}<div class="mu">${d.owner?'مدیر اصلی':d.approved?'تأییدشده':'در انتظار تأیید'}${d.at?' · '+new Date(d.at).toLocaleDateString('fa-IR'):''}</div></span><span style="display:flex;gap:6px">${d.owner?'':(d.approved?'':`<button class="acc" data-a="dvap" data-id="${esc(id)}">تأیید</button>`)+`<button data-a="dvrm" data-id="${esc(id)}" style="color:var(--not)">${d.approved?'حذف دسترسی':'رد'}</button>`}</span></div>`).join('')||'<div class="mu">دستگاهی ثبت نشده است.</div>'}</div>`};
+const devPend=()=>window.__dev&&__dev.owner()?Object.values(__dev.all()).filter(d=>!d.approved):[];
+const devAlert=()=>{const P=devPend();return P.length?`<div class="card" style="margin-bottom:14px;border-color:var(--acc)"><b>🔐 درخواست دسترسی مدیر (${fa(P.length)})</b><div class="mu" style="margin:6px 0 10px">${P.map(d=>esc(d.name||'نامشخص')).join('، ')} منتظر تأیید شما ${P.length>1?'هستند':'است'}.</div><button class="acc" data-a="devgo" style="width:100%">بررسی و تأیید</button></div>`:''};
 const hTerms=c=>String(c.hours||'').split('+').map(pnum).filter(x=>!isNaN(x));
 const sHours=c=>{const S=sess(c),H=(c.shours||[]).map(pnum),T=hTerms(c),tot=T.reduce((a,b)=>a+b,0);return S.map((_,i)=>!isNaN(H[i])?H[i]:(T.length===S.length?T[i]:(tot&&S.length?+(tot/S.length).toFixed(2):0)))};
 const hTotal=c=>{const t=sHours(c).reduce((a,b)=>a+b,0);return t?+t.toFixed(2):(hTerms(c).reduce((a,b)=>a+b,0)||0)};
