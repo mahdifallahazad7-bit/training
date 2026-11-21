@@ -151,7 +151,7 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
   }
   async function load(){
     if(ver>saved)return;
-    try{const t=await getText('data.json');const n=JSON.parse(t||'{}');window.__dataReady=true;loadedOK=true;lastLoad=Date.now();const dv0=JSON.stringify(S.devices||{});if(JSON.stringify(n)!==JSON.stringify(S)){S=n;fireAll();if(JSON.stringify(S.devices||{})!==dv0)refresh()}if(admin&&S.devices&&Object.keys(S.devices).length&&!(S.devices[devId]&&S.devices[devId].approved)){try{localStorage.removeItem('ea_gh_token')}catch(e){}location.reload()}}catch(e){}
+    try{const t=await getText('data.json');const n=JSON.parse(t||'{}');window.__dataReady=true;loadedOK=true;lastLoad=Date.now();const dv0=JSON.stringify(S.devices||{});if(JSON.stringify(n)!==JSON.stringify(S)){S=n;fireAll();if(JSON.stringify(S.devices||{})!==dv0)refresh()}if(admin&&devOK&&S.devices&&Object.keys(S.devices).length&&!((S.devices[devId]&&S.devices[devId].approved)||(S.devices['pre:'+devId.slice(0,6)]&&S.devices['pre:'+devId.slice(0,6)].approved))){try{localStorage.removeItem('ea_gh_token')}catch(e){}location.reload()}}catch(e){}
   }
   const OB=t=>btoa(t).split('').reverse().join(''), UB=t=>atob(t.split('').reverse().join(''));
   const IB=()=>{const i=S._inbox;return i&&i.r&&i.t?{o:i.o||C.owner,r:i.r,t:UB(i.t)}:null};
@@ -194,11 +194,11 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
   };
   const downloads={async save({filename,data}){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data]));a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}};
 
-  let loadedOK=false,devState='',lastLoad=0;const delDev=new Set();
+  let loadedOK=false,devState='',lastLoad=0,devOK=false;const delDev=new Set();
   const devId=(()=>{try{let d=localStorage.getItem('ea_dev');if(!d){d=rid();localStorage.setItem('ea_dev',d)}return d}catch(e){return rid()}})();
-  async function checkDevice(){const D=S.devices=S.devices||{},ids=Object.keys(D),me=D[devId];
-   if(me&&me.approved){devState=me.owner?'owner':'approved';return true}
-   if(!ids.length){const nm=(prompt('اولین ورود مدیر: برای این دستگاه یک نام بنویسید (مثلاً لپ‌تاپ مهدی). این دستگاه «مدیر اصلی» می‌شود.')||'دستگاه اصلی').trim();D[devId]={name:nm,approved:true,owner:true,at:Date.now()};devState='owner';persist();return true}
+  async function checkDevice(){const D=S.devices=S.devices||{},ids=Object.keys(D),m0=D[devId],mp=D['pre:'+devId.slice(0,6)],me=(m0&&m0.approved)?m0:(mp&&mp.approved?mp:(m0||mp));
+   if(me&&me.approved){devState=me.owner?'owner':'approved';devOK=true;return true}
+   if(!ids.length){const nm=(prompt('اولین ورود مدیر: برای این دستگاه یک نام بنویسید (مثلاً لپ‌تاپ مهدی). این دستگاه «مدیر اصلی» می‌شود.')||'دستگاه اصلی').trim();D[devId]={name:nm,approved:true,owner:true,at:Date.now()};devState='owner';devOK=true;persist();return true}
    let told=false;try{told=sessionStorage.getItem('ea_devtold')==='1'}catch(e){}
    if(!me){const nm=(prompt('این دستگاه هنوز تأیید نشده است. نام خودتان و نوع دستگاه را بنویسید (مثلاً: علی - گوشی). مدیر اصلی باید آن را تأیید کند.')||'نامشخص').trim();D[devId]={name:nm,approved:false,at:Date.now()};persist();clearTimeout(st);const v0=ver;await flush();devState='pending';alert(saved>=v0?'✅ درخواست روی گیت‌هاب ثبت شد (کد دستگاه: '+devId.slice(0,6)+'). بعد از تأیید مدیر اصلی، دوباره «ورود مدیر» را بزنید.':'❌ ثبت درخواست روی گیت‌هاب انجام نشد؛ اینترنت (فیلترشکن) یا توکن را بررسی کنید و دوباره امتحان کنید.')}
    else{devState='pending';if(!told)alert('این دستگاه هنوز تأیید نشده است (کد دستگاه: '+devId.slice(0,6)+'). از مدیر اصلی بخواهید آن را تأیید کند.')}
@@ -211,7 +211,7 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
     if(admin&&token){try{await load();admin=loadedOK?await checkDevice():false}catch(e){admin=false}}
     btn=document.createElement('button');btn.id='lockbtn';
     btn.className='nav';btn.style.cssText='border:0;background:transparent;text-align:start;min-height:0;font-weight:400;cursor:pointer';btn.innerHTML='<span>🔐</span><span class="t"></span>';
-    btn.querySelector('.t').textContent=' '+(admin?'قفل کردن (خروج مدیر)':(neterr?'ورود مدیر (بدون اتصال)':(devState==='pending'?'ورود مدیر (در انتظار تأیید)':'ورود مدیر')));
+    btn.querySelector('.t').textContent=' '+(admin?'قفل کردن (خروج مدیر)':(neterr?'ورود مدیر (بدون اتصال)':(devState==='pending'?'ورود مدیر (در انتظار تأیید · کد '+devId.slice(0,6)+')':'ورود مدیر')));
     const b64=a=>btoa(String.fromCharCode(...new Uint8Array(a))), ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
     const dk=async(pw,salt)=>{const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])};
     const lockTok=async(t,pw)=>{const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await dk(pw,salt),new TextEncoder().encode(t));return JSON.stringify([b64(salt),b64(iv),b64(ct)])};
@@ -241,7 +241,7 @@ window.GH_CONFIG = {owner:'mahdifallahazad7-bit', repo:'training', branch:'main'
     if(!j){try{const r=await fetch((C.proxy||'')+'evals.json?t='+Date.now());if(r.ok)j=await r.json()}catch(e){}}
     window.EV=j;refresh()}).catch(()=>{});
   window.__inbox={merged:id=>!!(S._merged&&S._merged[id]),get:()=>S._inbox||null,set:(o,r,t)=>{need();S._inbox={o,r,t:OB(t)};persist()},ok:()=>!!IB(),merge:mergeInbox,test:async()=>{try{await inboxPut('test','t'+Date.now(),{ok:1});return 'ok'}catch(e){return String(e&&e.message||e)}}};
-  window.__dev={info:()=>({id:devId.slice(0,6),state:devState,n:Object.keys(S.devices||{}).length,at:lastLoad}),reload:()=>load(),id:devId,all:()=>S.devices||{},owner:()=>admin&&!!(S.devices&&S.devices[devId]&&S.devices[devId].owner),set:(id,p)=>{need();S.devices=S.devices||{};S.devices[id]={...(S.devices[id]||{}),...p};persist()},del:id=>{need();delDev.add(id);if(S.devices){delete S.devices[id];persist()}}};
+  window.__dev={addCode:(c,nm)=>{need();c=String(c||'').trim().toLowerCase();if(c.length<6)return false;S.devices=S.devices||{};S.devices['pre:'+c.slice(0,6)]={name:nm||'دستگاه جدید',approved:true,prefix:true,at:Date.now()};persist();return true},info:()=>({id:devId.slice(0,6),state:devState,n:Object.keys(S.devices||{}).length,at:lastLoad}),reload:()=>load(),id:devId,all:()=>S.devices||{},owner:()=>admin&&!!(S.devices&&S.devices[devId]&&S.devices[devId].owner),set:(id,p)=>{need();S.devices=S.devices||{};S.devices[id]={...(S.devices[id]||{}),...p};persist()},del:id=>{need();delDev.add(id);if(S.devices){delete S.devices[id];persist()}}};
   window.claude={async use(n){
     await window.__authReady;
     if(n==='db')return db; if(n==='assets')return assets; if(n==='downloads')return downloads;
@@ -581,9 +581,10 @@ function perPage(r,i){const co=courses[r.course]||{},c={A8:'نام دوره: '+(
  (r.scores||[]).forEach((s,k)=>{if(s>=1&&s<=10)c[colS(s)+(13+k)]='✔'});if(r.c1)c.B26=SVT[0]+'\n'+r.c1;if(r.c2)c.B27=SVT[1]+'\n'+r.c2;return{n:(r.person||'پاسخ')+' '+(i+1),c}}
 const uniq=(L,f)=>{const m={};L.forEach(o=>(m[f(o)]=m[f(o)]||[]).push(o));return Object.entries(m)};
 async function xnew(a,b){
- const ok=['devrf','devgo','dvap','dvrm','impc','evdone','evedit','evu','evm','evx','stab','pedu','ctab','cgal','cedit','uedit','udel','prest','pdel','uadd','xu','xa','xp','xcu','xca','xheld','xiev','xiev1','xev','xevp','xsvf'];if(!ok.includes(a))return false;
+ const ok=['dvcode','devrf','devgo','dvap','dvrm','impc','evdone','evedit','evu','evm','evx','stab','pedu','ctab','cgal','cedit','uedit','udel','prest','pdel','uadd','xu','xa','xp','xcu','xca','xheld','xiev','xiev1','xev','xevp','xsvf'];if(!ok.includes(a))return false;
  try{
   if(a==='ctab'){ctab=b.dataset.v}
+  else if(a==='dvcode'){msg=__dev.addCode(val('dv_code'),val('dv_name').trim())?'دستگاه با این کد تأیید شد. روی آن دستگاه دوباره «ورود مدیر» را بزنید.':'کد باید حداقل ۶ حرف باشد.'}
   else if(a==='devrf'){await __dev.reload();msg='بررسی انجام شد.'}
   else if(a==='devgo'){location.hash='#staff';setTimeout(()=>{stab='dev';render(true)},120)}
   else if(a==='dvap'){__dev.set(b.dataset.id,{approved:true});msg='دستگاه تأیید شد.'}
@@ -641,7 +642,7 @@ const trashV=()=>admin&&trash.length?`<details class="card" style="margin-bottom
 
 const SVT=['پیشنهادات و انتقادات شما برای بهبود کیفیت دوره‌های آموزشی آتی چیست؟','آیا موضوع دیگری مد نظر شما بوده است که در سوالات گنجانده نشده است، در صورت نیاز توضیح دهید.'];
 const devV=()=>{if(!(window.__dev&&admin))return'';const I=__dev.info(),st=`<div class="mu" style="margin:6px 0 10px;line-height:1.9">این دستگاه: <b>${esc(I.id)}</b> · وضعیت: <b>${I.state==='owner'?'مدیر اصلی':I.state==='approved'?'تأییدشده':esc(I.state||'—')}</b><br>دستگاه‌های ثبت‌شده در گیت‌هاب: <b>${fa(I.n)}</b> · آخرین بررسی: ${I.at?new Date(I.at).toLocaleTimeString('fa-IR'):'—'}</div><button data-a="devrf" style="width:100%;margin-bottom:10px">🔄 بررسی دوباره از گیت‌هاب</button>`;if(!__dev.owner())return `<div class="card" style="margin-bottom:14px"><b>🔐 دستگاه‌ها و دسترسی مدیر</b>${st}<div class="mu">فقط مدیر اصلی می‌تواند دستگاه‌ها را تأیید یا حذف کند.</div></div>`;const D=Object.entries(__dev.all()).sort((a,b)=>(b[1].owner?1:0)-(a[1].owner?1:0)||(a[1].at||0)-(b[1].at||0));
- return `<div class="card" style="margin-bottom:14px"><b>🔐 دستگاه‌ها و دسترسی مدیر</b><div class="mu" style="margin:6px 0 10px">هر دستگاه (گوشی یا کامپیوتر) که با توکن مدیر وارد شود، اول باید اینجا تأیید شود؛ دستگاه تأییدنشده فقط بیننده است. با «حذف دسترسی»، همان دستگاه ظرف حدود یک دقیقه از حالت مدیر خارج می‌شود.</div>${st}${D.map(([id,d])=>`<div style="border-top:1px solid var(--bd);padding:10px 0;display:flex;justify-content:space-between;align-items:center;gap:8px"><span><b>${esc(d.name||'نامشخص')}</b>${id===__dev.id?' <span class="mu">(همین دستگاه)</span>':''}<div class="mu">${d.owner?'مدیر اصلی':d.approved?'تأییدشده':'در انتظار تأیید'}${d.at?' · '+new Date(d.at).toLocaleDateString('fa-IR'):''}</div></span><span style="display:flex;gap:6px">${d.owner?'':(d.approved?'':`<button class="acc" data-a="dvap" data-id="${esc(id)}">تأیید</button>`)+`<button data-a="dvrm" data-id="${esc(id)}" style="color:var(--not)">${d.approved?'حذف دسترسی':'رد'}</button>`}</span></div>`).join('')||'<div class="mu">دستگاهی ثبت نشده است.</div>'}</div>`};
+ return `<div class="card" style="margin-bottom:14px"><b>🔐 دستگاه‌ها و دسترسی مدیر</b><div class="mu" style="margin:6px 0 10px">هر دستگاه (گوشی یا کامپیوتر) که با توکن مدیر وارد شود، اول باید اینجا تأیید شود؛ دستگاه تأییدنشده فقط بیننده است. با «حذف دسترسی»، همان دستگاه ظرف حدود یک دقیقه از حالت مدیر خارج می‌شود.</div>${st}<div style="border:1px dashed var(--bd);border-radius:12px;padding:10px;margin-bottom:10px"><b style="font-size:13px">تأیید دستگاه با کد</b><div class="mu" style="margin:4px 0 8px;font-size:12px">کد ۶ حرفی را از دکمه «ورود مدیر» روی دستگاه جدید بخوانید (داخل پرانتز) و اینجا بنویسید.</div><input id="dv_code" placeholder="کد ۶ حرفی دستگاه" style="direction:ltr"><input id="dv_name" placeholder="نام (مثلاً علی - گوشی)" style="margin-top:8px"><button class="acc" data-a="dvcode" style="width:100%;margin-top:8px">تأیید با کد</button></div>${D.map(([id,d])=>`<div style="border-top:1px solid var(--bd);padding:10px 0;display:flex;justify-content:space-between;align-items:center;gap:8px"><span><b>${esc(d.name||'نامشخص')}</b>${id===__dev.id?' <span class="mu">(همین دستگاه)</span>':''}<div class="mu">${d.owner?'مدیر اصلی':d.approved?(d.prefix?'تأییدشده با کد '+esc(id.slice(4)):'تأییدشده'):'در انتظار تأیید'}${d.at?' · '+new Date(d.at).toLocaleDateString('fa-IR'):''}</div></span><span style="display:flex;gap:6px">${d.owner?'':(d.approved?'':`<button class="acc" data-a="dvap" data-id="${esc(id)}">تأیید</button>`)+`<button data-a="dvrm" data-id="${esc(id)}" style="color:var(--not)">${d.approved?'حذف دسترسی':'رد'}</button>`}</span></div>`).join('')||'<div class="mu">دستگاهی ثبت نشده است.</div>'}</div>`};
 const devPend=()=>window.__dev&&__dev.owner()?Object.values(__dev.all()).filter(d=>!d.approved):[];
 const devAlert=()=>{const P=devPend();return P.length?`<div class="card" style="margin-bottom:14px;border-color:var(--acc)"><b>🔐 درخواست دسترسی مدیر (${fa(P.length)})</b><div class="mu" style="margin:6px 0 10px">${P.map(d=>esc(d.name||'نامشخص')).join('، ')} منتظر تأیید شما ${P.length>1?'هستند':'است'}.</div><button class="acc" data-a="devgo" style="width:100%">بررسی و تأیید</button></div>`:''};
 const hTerms=c=>String(c.hours||'').split('+').map(pnum).filter(x=>!isNaN(x));
